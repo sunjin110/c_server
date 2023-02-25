@@ -14,6 +14,9 @@ static const int MAX_PENDING_CONNECTION = 10;
 static const int PORT = 8088;
 
 extern int http_serve() {
+
+  printf("=== start server: http://localhost:%d\n", PORT);
+
   // read socket
   // ipv4 protocol,
   int server_sock = socket(AF_INET, SOCK_STREAM, 0);
