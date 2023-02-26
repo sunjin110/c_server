@@ -98,22 +98,6 @@ extern int http_serve() {
       return -1;
     }
 
-    // read request
-    // char request[REQUEST_SIZE] = {0};
-    // ssize_t read_size = read(client_sock, request, REQUEST_SIZE);
-    // if (read_size < 0) {
-    //     printf("Error: failed read\n");
-    //     printf("reason: errno:%d\n", errno);
-    //     return -1;
-    // }
-    // printf("read size is %d\n", REQUEST_SIZE);
-    // printf("request is %s\n", request);
-
-    // for (;;) {
-    //     char request[256] = {0};
-    //     read(client_sock, )
-    // }
-
     ssize_t request_length = 0;
     ssize_t read_bytes = 0;
     char *request = NULL;
