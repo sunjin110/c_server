@@ -106,7 +106,7 @@ extern void put_to_hash_map(hash_map *map, const char *key, const char *value) {
         return;
     }
 
-    // TODO capacity自動で追加
+    // capacity調整
     int new_capacity = map->capacity * 2;
     entry **new_buckets = calloc(new_capacity, sizeof(entry*));
     if (new_buckets == NULL) {
