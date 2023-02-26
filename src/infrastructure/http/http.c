@@ -13,6 +13,8 @@
 static const int MAX_PENDING_CONNECTION = 10;
 static const int PORT = 8088;
 
+static char *get_request(int client_sock);
+
 extern int http_serve() {
   printf("=== start server: http://localhost:%d\n", PORT);
 
@@ -97,33 +99,12 @@ extern int http_serve() {
       return -1;
     }
 
-    ssize_t request_length = 0;
-    ssize_t read_bytes = 0;
-    char *request = NULL;
-    for (;;) {
-      char buf[REQUEST_CHUNK_SIZE];
-      read_bytes = read(client_sock, buf, REQUEST_CHUNK_SIZE);
-      if (read_bytes < 0) {
-        printf("Error: failed read...\n");
-        printf("reason: errno:%d\n", errno);
-        return -1;
-      }
-
-      request = realloc(request, request_length + read_bytes);
-      if (request == NULL) {
-        printf("Error: failed realloc request\n");
-        printf("reason: errno:%d\n", errno);
-        return -1;
-      }
-      memcpy(request + request_length, buf, read_bytes);
-      request_length += read_bytes;
-      if (read_bytes < REQUEST_CHUNK_SIZE) {
-        break;
-      }
+    char *request = get_request(client_sock);
+    if (request == NULL) {
+      return -1;
     }
 
     printf("request is %s\n", request);
-    printf("request_length %zd\n", request_length);
 
     // response message
     char *response = "HTTP/1.1 200 OK\nContent-Length: 12\n\nHello World!\n";
@@ -153,4 +134,32 @@ extern int http_serve() {
   }
 
   return 0;
+}
+
+static char *get_request(int client_sock) {
+  ssize_t request_length = 0;
+  ssize_t read_bytes = 0;
+  char *request = NULL;
+  for (;;) {
+    char buf[REQUEST_CHUNK_SIZE];
+    read_bytes = read(client_sock, buf, REQUEST_CHUNK_SIZE);
+    if (read_bytes < 0) {
+      printf("Error: failed read...\n");
+      printf("reason: errno:%d\n", errno);
+      return NULL;
+    }
+
+    request = realloc(request, request_length + read_bytes);
+    if (request == NULL) {
+      printf("Error: failed realloc request\n");
+      printf("reason: errno:%d\n", errno);
+      return NULL;
+    }
+    memcpy(request + request_length, buf, read_bytes);
+    request_length += read_bytes;
+    if (read_bytes < REQUEST_CHUNK_SIZE) {
+      break;
+    }
+  }
+  return request;
 }
