@@ -1,6 +1,9 @@
 {
     "files.associations": {
         "types.h": "c",
-        "in.h": "c"
+        "in.h": "c",
+        "hash_map.h": "c",
+        "socket.h": "c",
+        "unistd.h": "c"
     }
 }

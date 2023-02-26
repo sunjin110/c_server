@@ -1,25 +1,20 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include "hash_map.h"
 
 static const int INITIAL_CAPACITY = 16;
 
-typedef struct _entry {
-    char *key;
-    char *value;
-    struct _entry *next;
-} entry;
-
-typedef struct _hash_map {
-    struct _entry **buckets;
-    ssize_t size;
-    int capacity;
-} hash_map;
-
 static int hash(const char *key, int capacity) {
-    int hash = 0;
+    unsigned long hash = 0;
     for (int i = 0; key[i] != '\0'; i++) {
+        unsigned long tmp = hash;
         hash = 31 * hash + key[i];
+        if (tmp > hash) {
+            // overflow
+            printf("Error: hashの数字がoverflowしました\n");
+            exit(-1);
+        }
     }
     return hash % capacity;
 }
@@ -30,13 +25,11 @@ extern hash_map *new_hash_map() {
         printf("Error: failed malloc hash_map\n");
         return NULL;
     }
-
-    map->buckets = calloc(INITIAL_CAPACITY, sizeof(entry*));
+    map->buckets = calloc(INITIAL_CAPACITY, sizeof(entry *));
     if (map->buckets == NULL) {
         printf("Error: failed malloc hash_map->buckets\n");
         return NULL;
     }
-
     map->size = 0;
     map->capacity = INITIAL_CAPACITY;
     return map;
@@ -62,7 +55,6 @@ extern void free_hash_map(hash_map *map) {
 static entry *get_entry_from_hash_map(hash_map *map, const char *key) {
     int index = hash(key, map->capacity);
     entry *current_entry = map->buckets[index];
-
     for (;;) {
         if (current_entry == NULL) {
             return NULL;
