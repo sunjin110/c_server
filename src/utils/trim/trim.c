@@ -23,7 +23,7 @@ char *rtrim(char *str, const char *seps) {
         seps = "\t\n\v\f\r ";
     }
     int i = strlen(str) - 1;
-    while (i >= 0 && strchar(seps, str[i]) != NULL) {
+    while (i >= 0 && strchr(seps, str[i]) != NULL) {
         str[i] = '\0';
         i--;
     }
