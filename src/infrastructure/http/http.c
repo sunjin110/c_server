@@ -6,6 +6,7 @@
 #include <sys/socket.h>
 #include <sys/types.h>
 #include <unistd.h>
+#include "../../utils/hash_map/hash_map.h"
 
 #define REQUEST_SIZE 2048
 #define REQUEST_CHUNK_SIZE 1024
@@ -14,6 +15,7 @@ static const int MAX_PENDING_CONNECTION = 10;
 static const int PORT = 8088;
 
 static char *get_request(int client_sock);
+static hash_map *get_header_map(const char *request);
 
 extern int http_serve() {
   printf("=== start server: http://localhost:%d\n", PORT);
@@ -106,6 +108,9 @@ extern int http_serve() {
 
     printf("request is %s\n", request);
 
+    // get header
+    hash_map *header_map = get_header_map(request);
+
     // response message
     char *response = "HTTP/1.1 200 OK\nContent-Length: 12\n\nHello World!\n";
     printf("=== start write...\n");
@@ -162,4 +167,27 @@ static char *get_request(int client_sock) {
     }
   }
   return request;
+}
+
+static hash_map *get_header_map(const char *request) {
+  char *header_end = strstr(request, "\r\n\r\n");
+  if (header_end == NULL) {
+    printf("Error: not found header\n");
+    return NULL;
+  }
+  int header_length = header_end - request + 4;
+  char header[header_length + 1];
+  strncpy(header, request, header_length);
+
+  printf("header is %s\n", header);
+
+  char *rest = NULL;
+  char *token = strtok_r(header, "\n", &rest);
+  printf("token is %s\n", token);
+  token = strtok_r(NULL, "\n", &rest);
+  printf("token2 is %s\n", token);
+
+  // TODO strtok_r() 
+
+  return NULL; // TODO
 }
