@@ -83,7 +83,7 @@ extern char *get_value_from_hash_map(hash_map *map, const char *key) {
     return e->value;
 }
 
-extern void *put_to_hash_map(hash_map *map, const char *key, const char *value) {
+extern void put_to_hash_map(hash_map *map, const char *key, const char *value) {
     // 既に対象のkeyがある場合は、valueを上書き
     entry *e = get_entry_from_hash_map(map, key);
     if (e != NULL) {
