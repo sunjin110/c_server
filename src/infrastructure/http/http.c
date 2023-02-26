@@ -1,11 +1,11 @@
 #include <errno.h>
 #include <netinet/in.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 #include <sys/socket.h>
 #include <sys/types.h>
 #include <unistd.h>
-#include <stdlib.h>
 
 #define REQUEST_SIZE 2048
 #define REQUEST_CHUNK_SIZE 1024
@@ -14,7 +14,6 @@ static const int MAX_PENDING_CONNECTION = 10;
 static const int PORT = 8088;
 
 extern int http_serve() {
-
   printf("=== start server: http://localhost:%d\n", PORT);
 
   // read socket
@@ -102,25 +101,25 @@ extern int http_serve() {
     ssize_t read_bytes = 0;
     char *request = NULL;
     for (;;) {
-        char buf[REQUEST_CHUNK_SIZE];
-        read_bytes = read(client_sock, buf, REQUEST_CHUNK_SIZE);
-        if (read_bytes < 0) {
-            printf("Error: failed read...\n");
-            printf("reason: errno:%d\n", errno);
-            return -1;
-        }
+      char buf[REQUEST_CHUNK_SIZE];
+      read_bytes = read(client_sock, buf, REQUEST_CHUNK_SIZE);
+      if (read_bytes < 0) {
+        printf("Error: failed read...\n");
+        printf("reason: errno:%d\n", errno);
+        return -1;
+      }
 
-        request = realloc(request, request_length + read_bytes);
-        if (request == NULL) {
-            printf("Error: failed realloc request\n");
-            printf("reason: errno:%d\n", errno);
-            return -1;
-        }
-        memcpy(request + request_length, buf, read_bytes);
-        request_length += read_bytes;
-        if (read_bytes < REQUEST_CHUNK_SIZE) {
-            break;
-        }
+      request = realloc(request, request_length + read_bytes);
+      if (request == NULL) {
+        printf("Error: failed realloc request\n");
+        printf("reason: errno:%d\n", errno);
+        return -1;
+      }
+      memcpy(request + request_length, buf, read_bytes);
+      request_length += read_bytes;
+      if (read_bytes < REQUEST_CHUNK_SIZE) {
+        break;
+      }
     }
 
     printf("request is %s\n", request);

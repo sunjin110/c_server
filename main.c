@@ -1,9 +1,9 @@
 #include <stdio.h>
+
 #include "src/infrastructure/http/http.h"
 #include "src/utils/hash_map/hash_map.h"
 
 int main() {
-
   printf("=== hello \n");
   hash_map *m = new_hash_map();
   printf("=== put start!!! \n");
