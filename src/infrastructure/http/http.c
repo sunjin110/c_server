@@ -6,6 +6,7 @@
 #include <sys/socket.h>
 #include <sys/types.h>
 #include <unistd.h>
+
 #include "../../utils/hash_map/hash_map.h"
 
 #define REQUEST_SIZE 2048
@@ -187,7 +188,7 @@ static hash_map *get_header_map(const char *request) {
   token = strtok_r(NULL, "\n", &rest);
   printf("token2 is %s\n", token);
 
-  // TODO strtok_r() 
+  // TODO strtok_r()
 
-  return NULL; // TODO
+  return NULL;  // TODO
 }
