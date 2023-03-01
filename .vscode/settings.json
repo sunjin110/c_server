@@ -4,6 +4,7 @@
         "in.h": "c",
         "hash_map.h": "c",
         "socket.h": "c",
-        "unistd.h": "c"
+        "unistd.h": "c",
+        "zlib.h": "c"
     }
 }

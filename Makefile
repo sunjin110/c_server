@@ -15,9 +15,11 @@ product_build:
 
 run:
 	make b
-	./build/main
+	./build/c_server
 
 fmt:
 	clang-format -i --verbose ./main.c
 	find src -name "*.c" -or -name "*.h" | xargs clang-format -i --verbose
 	
+tidy:
+	conan install . --output-folder=build --build=missing
