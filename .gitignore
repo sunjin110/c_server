@@ -37,4 +37,4 @@ build/
 
 release/
 
-CMakeUserPresents.json
+CMakeUserPresets.json

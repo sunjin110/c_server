@@ -5,6 +5,11 @@
         "hash_map.h": "c",
         "socket.h": "c",
         "unistd.h": "c",
-        "zlib.h": "c"
+        "zlib.h": "c",
+        "gtest/gtest.h": "cpp",
+        "stdio.h": "c",
+        "stdlib.h": "c",
+        "linked_str_list.h": "c",
+        "stdbool.h": "c"
     }
 }
