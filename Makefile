@@ -1,16 +1,19 @@
 b:
 	touch CMakeLists.txt
-	# rm -rf build
-	# conan install . --output-folder=build --build=missing
-	# cmake . -DCMAKE_TOOLCHAIN_FILE=build/conan_toolchain.cmake -DCMAKE_BUILD_TYPE=Release -B build
 	cmake --build build
 
 hard_build:
+	# なんか色々上手くいかんときは、大体これをすれば上手くいく
 	touch CMakeLists.txt
 	rm -rf build
 	conan install . --output-folder=build --build=missing
 	cmake . -DCMAKE_TOOLCHAIN_FILE=build/conan_toolchain.cmake -DCMAKE_BUILD_TYPE=Release -B build
 	cmake --build build
+
+clean:
+	rm -rf build
+	conan install . --output-folder=build --build=missing
+	cmake . -DCMAKE_TOOLCHAIN_FILE=build/conan_toolchain.cmake -DCMAKE_BUILD_TYPE=Release -B build
 
 t:
 	make b

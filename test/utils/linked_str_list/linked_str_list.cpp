@@ -16,4 +16,8 @@ TEST(src_utils_linked_str_list, success) {
     append_linked_str_list(list, "どうぞよろしく");
     std::cout << "===== print_linked_str_list\n";
     print_linked_str_list(list);
+
+    ASSERT_STREQ(value_linked_str_list(list, 0), "hello world");
+    ASSERT_STREQ(value_linked_str_list(list, 1), "sunjin");
+    ASSERT_STREQ(value_linked_str_list(list, 2), "どうぞよろしく");
 }

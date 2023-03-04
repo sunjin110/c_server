@@ -17,8 +17,7 @@ extern void append_linked_str_list(linked_str_list *list, char *value) {
   list->size++;
 
   linked_str_element *new_element = malloc(sizeof(linked_str_element));
-  new_element->value = malloc(strlen(value));
-  strcpy(new_element->value, value);
+  new_element->value = strdup(value);
   new_element->next_ptr = NULL;
   if (list->first_ptr == NULL) {
     list->first_ptr = new_element;
@@ -27,6 +26,29 @@ extern void append_linked_str_list(linked_str_list *list, char *value) {
   }
   list->last_ptr->next_ptr = new_element;
   list->last_ptr = new_element;
+}
+
+extern char *value_linked_str_list(linked_str_list *list, size_t index) {
+  size_t max_index = list->size - 1;
+  if (max_index < index) {
+    fprintf(stderr, "linked_str_list: out of bounds. index=%zu\n", index);
+    return NULL;
+  }
+
+  linked_str_element *current_element = list->first_ptr;
+  size_t current_index = 0;
+  for (;;) {
+    if (current_element == NULL) {
+      return NULL;
+    }
+
+    if (current_index == index) {
+      return strdup(current_element->value);
+    }
+    current_element = current_element->next_ptr;
+    current_index++;
+  }
+  return NULL;
 }
 
 extern void free_linked_str_list(linked_str_list *list) {
@@ -45,6 +67,7 @@ extern void free_linked_str_list(linked_str_list *list) {
   list->last_ptr = NULL;
   list->size = 0;
   free(list);
+  list = NULL;
 }
 
 extern bool find_in_linked_str_list(linked_str_list *list, char *target_value) {
