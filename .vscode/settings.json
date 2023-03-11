@@ -10,6 +10,16 @@
         "stdio.h": "c",
         "stdlib.h": "c",
         "linked_str_list.h": "c",
-        "stdbool.h": "c"
+        "stdbool.h": "c",
+        "string.h": "c",
+        "split.h": "c",
+        "iostream": "cpp",
+        "__config": "cpp",
+        "iosfwd": "cpp",
+        "ostream": "cpp",
+        "istream": "cpp",
+        "ios": "cpp",
+        "http.h": "c",
+        "http.c": "cpp"
     }
 }

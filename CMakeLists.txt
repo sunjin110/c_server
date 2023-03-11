@@ -22,7 +22,7 @@ target_link_libraries(${PROJECT_NAME} ZLIB::ZLIB)
 # add_link_options(-fuse-ld=mold)
 
 # macではmoldはなんかsoldにしないといけないみたい
-# add_link_options(-fuse-ld=lld)
+add_link_options(-fuse-ld=lld)
 
 # target_compile_options(${PROJECT_NAME} PUBLIC -Wall)
 target_compile_options(${PROJECT_NAME} PUBLIC -O2 -Wall)

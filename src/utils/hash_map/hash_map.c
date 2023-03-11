@@ -4,18 +4,14 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include "../linked_str_list/linked_str_list.h"
+
 static const int INITIAL_CAPACITY = 16;
 
-static int hash(const char *key, int capacity) {
-  unsigned long hash = 0;
+static uint64_t hash(const char *key, int capacity) {
+  uint64_t hash = 0;
   for (int i = 0; key[i] != '\0'; i++) {
-    unsigned long tmp = hash;
-    hash = 31 * hash + key[i];
-    if (tmp > hash) {
-      // overflow
-      printf("Error: hashの数字がoverflowしました\n");
-      exit(-1);
-    }
+    hash = (hash << 5) - hash + key[i];
   }
   return hash % capacity;
 }
@@ -37,6 +33,11 @@ extern hash_map *new_hash_map() {
 }
 
 extern void free_hash_map(hash_map *map) {
+  if (map == NULL) {
+    printf("hash_map: free_hash_map: map is NULL\n");
+    return;
+  }
+
   for (int i = 0; i < map->capacity; i++) {
     entry *current_entry = map->buckets[i];
     for (;;) {
@@ -132,4 +133,22 @@ extern void put_to_hash_map(hash_map *map, const char *key, const char *value) {
   free(map->buckets);
   map->buckets = new_buckets;
   map->capacity = new_capacity;
+}
+
+extern void debug_hash_map(hash_map *map) {
+  if (map == NULL) {
+    printf("hash_map is NULL\n");
+    return;
+  }
+  printf("size:%zd, capacity:%d\n", map->size, map->capacity);
+  for (int i = 0; i < map->capacity; i++) {
+    entry *current_entry = map->buckets[i];
+    for (;;) {
+      if (current_entry == NULL) {
+        break;
+      }
+      printf("%s->%s\n", current_entry->key, current_entry->value);
+      current_entry = current_entry->next;
+    }
+  }
 }
