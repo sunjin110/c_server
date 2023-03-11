@@ -13,10 +13,12 @@ project(c_server)
 
 find_package(ZLIB REQUIRED)
 
+find_package(jansson REQUIRED)
+
 file(GLOB_RECURSE src ${PROJECT_SOURCE_DIR} "src/*.h" "src/*.c")
 
 add_executable(${PROJECT_NAME} main.c ${src})
-target_link_libraries(${PROJECT_NAME} ZLIB::ZLIB)
+target_link_libraries(${PROJECT_NAME} ZLIB::ZLIB jansson::jansson)
 
 # use mold
 # add_link_options(-fuse-ld=mold)

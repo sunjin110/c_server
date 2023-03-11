@@ -191,24 +191,24 @@ static request_info *get_request(int client_sock) {
   printf("=== get header\n");
   hash_map *header_map = get_header_map(request_str);
 
+  // body
+  printf("=== get body\n");
+  char *content_length_str =
+      get_value_from_hash_map(header_map, "Content-Length");
+
+  char *body_str = NULL;
+  if (content_length_str != NULL) {
+    int content_length = atoi(content_length_str);
+    body_str = get_body_str(request_str, content_length);
+  }
+
   request_info *info = (request_info *)malloc(sizeof(request_info));
   info->method = convert_method(method_str);
   info->path = value_linked_str_list(path_and_params_list, 0);
   info->param_map = param_map;
   info->header_map = header_map;
+  info->body = body_str;
 
-  // body
-  char *content_length_str =
-      get_value_from_hash_map(info->header_map, "Content-Length");
-  int content_length = atoi(content_length_str);
-
-  char *body_str = get_body_str(request_str, content_length);
-  printf("body_str is %s\n", body_str);
-
-
-
-  free(body_str);
-  body_str = NULL;
   free(method_str);
   method_str = NULL;
   free(methodAndPath);
@@ -274,6 +274,13 @@ static void free_request(request_info *info) {
   printf("=== start param_map free\n");
   if (info->param_map != NULL) {
     free_hash_map(info->param_map);
+  }
+
+  printf("=== start body free\n");
+  if (info->body != NULL) {
+    printf("body is %s\n", info->body);
+    free(info->body);
+    // info->body = NULL;
   }
 
   info->header_map = NULL;
@@ -351,12 +358,9 @@ static char *get_body_str(const char *request, size_t content_length) {
     return NULL;
   }
 
-  // size_t header_length = header_end - request + 4;
-
   char *body_str = (char *)malloc(content_length + 1);
   strncpy(body_str, header_end + 4, content_length);
   body_str[content_length] = '\0';
-  // printf("body_str is %s\n", body_str);
   return body_str;
 }
 
@@ -375,7 +379,7 @@ static hash_map *get_header_map(const char *request) {
   hash_map *header_map = new_hash_map();
 
   // 1個目はpathなのでスルー
-  linked_str_element *current_request_str_line = 
+  linked_str_element *current_request_str_line =
       header_line_list->first_ptr->next_ptr;
   for (;;) {
     if (current_request_str_line == NULL) {

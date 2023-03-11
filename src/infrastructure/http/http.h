@@ -10,6 +10,7 @@ typedef struct _request_info {
   char *path;
   hash_map *header_map;
   hash_map *param_map;
+  char *body;
 } request_info;
 
 extern int http_serve(void);
