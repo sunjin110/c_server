@@ -38,6 +38,11 @@ extern void free_hash_map(hash_map *map) {
     return;
   }
 
+  if (map->buckets == NULL) {
+    printf("hash_map: free_hash_map: buckets is NULL\n");
+    return;
+  }
+
   for (int i = 0; i < map->capacity; i++) {
     entry *current_entry = map->buckets[i];
     for (;;) {
@@ -69,6 +74,7 @@ static entry *get_entry_from_hash_map(hash_map *map, const char *key) {
   return NULL;
 }
 
+// これで受け取ったstringは消す必要がない、変更する場合はcopyする必要あり
 extern char *get_value_from_hash_map(hash_map *map, const char *key) {
   entry *e = get_entry_from_hash_map(map, key);
   if (e == NULL) {

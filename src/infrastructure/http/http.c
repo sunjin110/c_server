@@ -9,12 +9,12 @@
 #include <sys/types.h>
 #include <unistd.h>
 
+#include "../../utils/equal_str/equal_str.h"
 #include "../../utils/hash_map/hash_map.h"
 #include "../../utils/linked_str_list/linked_str_list.h"
 #include "../../utils/split/split.h"
-#include "../../utils/equal_str/equal_str.h"
-#include "../../utils/trim/trim.h"
 #include "../../utils/str/str.h"
+#include "../../utils/trim/trim.h"
 
 #define REQUEST_SIZE 2048
 #define REQUEST_CHUNK_SIZE 1024
@@ -40,6 +40,7 @@ static hash_map *get_header_map(const char *request);
 static method_t convert_method(const char *method_str);
 static hash_map *get_param_map(const char *param_str);
 static void free_request(request_info *info);
+static char *get_body_str(const char *request_str, size_t content_length);
 
 extern int http_serve() {
   printf("=== start server: http://localhost:%d\n", PORT);
@@ -174,7 +175,6 @@ static request_info *get_request(int client_sock) {
   // paramはない場合がある
   char *path_and_params = value_linked_str_list(method_and_path_list, 1);
 
-
   linked_str_list *path_and_params_list = split(path_and_params, "?");
 
   // param
@@ -190,13 +190,25 @@ static request_info *get_request(int client_sock) {
   // header_strを取得する
   printf("=== get header\n");
   hash_map *header_map = get_header_map(request_str);
- 
+
   request_info *info = (request_info *)malloc(sizeof(request_info));
   info->method = convert_method(method_str);
   info->path = value_linked_str_list(path_and_params_list, 0);
   info->param_map = param_map;
   info->header_map = header_map;
 
+  // body
+  char *content_length_str =
+      get_value_from_hash_map(info->header_map, "Content-Length");
+  int content_length = atoi(content_length_str);
+
+  char *body_str = get_body_str(request_str, content_length);
+  printf("body_str is %s\n", body_str);
+
+
+
+  free(body_str);
+  body_str = NULL;
   free(method_str);
   method_str = NULL;
   free(methodAndPath);
@@ -254,14 +266,16 @@ static void free_request(request_info *info) {
   free(info->path);
   info->path = NULL;
 
+  printf("=== start header_map free\n");
   if (info->header_map != NULL) {
     free_hash_map(info->header_map);
   }
 
+  printf("=== start param_map free\n");
   if (info->param_map != NULL) {
     free_hash_map(info->param_map);
   }
-  
+
   info->header_map = NULL;
   info->param_map = NULL;
   free(info);
@@ -325,6 +339,26 @@ static method_t convert_method(const char *method_str) {
   return -1;
 }
 
+static char *get_body_str(const char *request, size_t content_length) {
+  if (content_length <= 0) {
+    printf("not found content length");
+    return NULL;
+  }
+
+  char *header_end = (char *)strstr(request, "\r\n\r\n");
+  if (header_end == NULL) {
+    printf("Error: not found header\n");
+    return NULL;
+  }
+
+  // size_t header_length = header_end - request + 4;
+
+  char *body_str = (char *)malloc(content_length + 1);
+  strncpy(body_str, header_end + 4, content_length);
+  body_str[content_length] = '\0';
+  // printf("body_str is %s\n", body_str);
+  return body_str;
+}
 
 static hash_map *get_header_map(const char *request) {
   char *header_end = (char *)strstr(request, "\r\n\r\n");
@@ -341,7 +375,8 @@ static hash_map *get_header_map(const char *request) {
   hash_map *header_map = new_hash_map();
 
   // 1個目はpathなのでスルー
-  linked_str_element *current_request_str_line = header_line_list->first_ptr->next_ptr;
+  linked_str_element *current_request_str_line = 
+      header_line_list->first_ptr->next_ptr;
   for (;;) {
     if (current_request_str_line == NULL) {
       break;
@@ -357,11 +392,12 @@ static hash_map *get_header_map(const char *request) {
     strncpy(key, current_request_str_line->value, key_size);
     key[key_size] = '\0';
 
-    size_t value_size = strlen(current_request_str_line->value) - key_size - 1; // 「:」の文の長さを削除
+    size_t value_size = strlen(current_request_str_line->value) - key_size -
+                        1;  // 「:」の文の長さを削除
     char *value = (char *)malloc(value_size + 1);
-    strncpy(value, current_request_str_line->value + key_size + 1, value_size); // 「:」の長さをskip
+    strncpy(value, current_request_str_line->value + key_size + 1,
+            value_size);  // 「:」の長さをskip
     value[value_size] = '\0';
-
 
     put_to_hash_map(header_map, key, trim(value, NULL));
     current_request_str_line = current_request_str_line->next_ptr;
