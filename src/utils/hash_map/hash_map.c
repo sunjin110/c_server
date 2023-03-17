@@ -34,6 +34,8 @@ extern hash_map *new_hash_map() {
 }
 
 extern void free_hash_map(hash_map *map) {
+  printf("=== free_hash_map\n");
+
   if (map == NULL) {
     printf("hash_map: free_hash_map: map is NULL\n");
     return;
