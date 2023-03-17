@@ -19,8 +19,18 @@ run ln -s /usr/local/bin/mold /usr/local/bin/ld.mold
 
 run conan profile detect
 
+# run git clone https://gitlab.com/jobol/mustach.git
+
+
 workdir /root
 copy . .
+workdir /root/lib
+run git clone  https://gitlab.com/jobol/mustach.git
+workdir /root/lib/mustach
+run git checkout 1.2.5
+
+workdir /root
+
 run make hard_build
 
 cmd ./build/c_server

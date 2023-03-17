@@ -1,10 +1,13 @@
 b:
+	make gen
 	touch CMakeLists.txt
+	cmake . -DCMAKE_TOOLCHAIN_FILE=build/conan_toolchain.cmake -DCMAKE_BUILD_TYPE=Release -B build
 	cmake --build build
 
 hard_build:
 	# なんか色々上手くいかんときは、大体これをすれば上手くいく
 	touch CMakeLists.txt
+	make gen
 	rm -rf build
 	conan install . --output-folder=build --build=missing
 	cmake . -DCMAKE_TOOLCHAIN_FILE=build/conan_toolchain.cmake -DCMAKE_BUILD_TYPE=Release -B build
@@ -19,12 +22,8 @@ t:
 	make b
 	./build/c_server_test
 
-# init:
-# 	brew install gcc
-# 	mkdir build
-# 	mkdir release
-# 	cmake -S . -B build
-# 	cmake -S . -B release -DCMAKE_BUILD_TYPE=Release
+gen:
+	./generate_template_to_h.sh
 
 run:
 	make b

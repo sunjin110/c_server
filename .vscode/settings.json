@@ -20,6 +20,11 @@
         "istream": "cpp",
         "ios": "cpp",
         "http.h": "c",
-        "http.c": "cpp"
+        "http.c": "cpp",
+        "mustach-jansson.h": "c",
+        "mustach.h": "c",
+        "jansson.h": "c",
+        "file.h": "c",
+        "hello.html.h": "c"
     }
 }

@@ -9,7 +9,7 @@ extern linked_str_list *split(const char *str, const char *sep) {
     return NULL;
   }
 
-  int str_len = strlen(str);
+  size_t str_len = strlen(str);
   char target_str[str_len + 1];
   strncpy(target_str, str, str_len);
   target_str[str_len] = '\0';

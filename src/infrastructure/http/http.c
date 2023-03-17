@@ -12,22 +12,17 @@
 #include "../../utils/equal_str/equal_str.h"
 #include "../../utils/hash_map/hash_map.h"
 #include "../../utils/linked_str_list/linked_str_list.h"
+#include "../../utils/num/num.h"
 #include "../../utils/split/split.h"
 #include "../../utils/str/str.h"
 #include "../../utils/trim/trim.h"
-#include "../../utils/num/num.h"
+#include "router.h"
 
 #define REQUEST_SIZE 2048
 #define REQUEST_CHUNK_SIZE 1024
 
 static const int MAX_PENDING_CONNECTION = 10;
 static const int PORT = 8089;
-
-const method_t METHOD_GET = 1;
-const method_t METHOD_POST = 2;
-const method_t METHOD_DELETE = 3;
-const method_t METHOD_PUT = 4;
-const method_t METHOD_OPTIONS = 5;
 
 static const char *METHOD_GET_VALUE = "GET";
 static const char *METHOD_POST_VALUE = "POST";
@@ -129,22 +124,30 @@ extern int http_serve() {
 
     request_info *request = get_request(client_sock);
 
-    // response message
-    char *response_body = "<html><body><h1>Hello C Server World</h1></body></html>";
+    printf("=== start routing\n");
+    char *response_body = routing(request);
+
     size_t response_body_size = strlen(response_body);
-    size_t response_base_size = strlen("HTTP/1.1 200 OK\nContent-Length: \n\n\n");
+
+    size_t response_base_size =
+        strlen("HTTP/1.1 200 OK\nContent-Length: \n\n\n");
     size_t response_content_length_digit = num_digit(response_body_size);
 
     printf("response_body_size is %zd\n", response_body_size);
     printf("response_base_size is %zd\n", response_base_size);
-    printf("response_content_length_digit is %zd\n", response_content_length_digit);
+    printf("response_content_length_digit is %zd\n",
+           response_content_length_digit);
 
-    char response[response_body_size + response_base_size + response_content_length_digit + 1];
-    sprintf(response, "HTTP/1.1 200 OK\nContent-Length: %zu\n\n%s\n", response_body_size, response_body);
+    char response[response_body_size + response_base_size +
+                  response_content_length_digit + 1];
+    sprintf(response, "HTTP/1.1 200 OK\nContent-Length: %zu\n\n%s\n",
+            response_body_size, response_body);
     printf("response is %s\n", response);
 
-    printf("=========== TODO : response_body_free\n");
-
+    printf("=========== response_body_free\n");
+    if (response_body != NULL) {
+      free(response_body);
+    }
 
     printf("=== start write...\n");
     int write_result = write(client_sock, response, strlen(response) + 1);
