@@ -38,3 +38,5 @@ build/
 release/
 
 CMakeUserPresets.json
+
+lib/

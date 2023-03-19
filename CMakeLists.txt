@@ -7,24 +7,23 @@ include(CMakePrintHelpers)
 cmake_print_variables(CONAN_LIBS)
 cmake_print_variables(CMAKE_CXX_LINK_EXECUTABLE)
 
-# add_custom_command()
-
 project(c_server)
 
-find_package(ZLIB REQUIRED)
-
 find_package(jansson REQUIRED)
+include_directories(${jansson_INCLUDE_DIRS})
 
-file(GLOB_RECURSE src ${PROJECT_SOURCE_DIR} "src/*.h" "src/*.c")
+file(GLOB_RECURSE src ${PROJECT_SOURCE_DIR} "src/*.h" "src/*.c" 
+  "lib/mustach/mustach.h" "lib/mustach/mustach.c" "lib/mustach/mustach-jansson.h" "lib/mustach/mustach-jansson.c"
+  "lib/mustach/mustach-wrap.h" "lib/mustach/mustach-wrap.c")
 
 add_executable(${PROJECT_NAME} main.c ${src})
-target_link_libraries(${PROJECT_NAME} ZLIB::ZLIB jansson::jansson)
+target_link_libraries(${PROJECT_NAME} jansson::jansson m)
 
 # use mold
 # add_link_options(-fuse-ld=mold)
 
 # macではmoldはなんかsoldにしないといけないみたい
-add_link_options(-fuse-ld=lld)
+# add_link_options(-fuse-ld=lld)
 
 # target_compile_options(${PROJECT_NAME} PUBLIC -Wall)
 target_compile_options(${PROJECT_NAME} PUBLIC -O2 -Wall)
@@ -48,10 +47,11 @@ add_executable(
     c_server_test ${src} ${test}
 )
 
-# find_package(GTest)
 target_link_libraries(
   c_server_test
   gtest::gtest
+  jansson::jansson 
+  m
 )
 
 include(GoogleTest)

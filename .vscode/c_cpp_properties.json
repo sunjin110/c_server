@@ -4,7 +4,8 @@
             "name": "Mac",
             "includePath": [
                 "${workspaceFolder}/**",
-                "~/.conan2/p/gtest76809f6b05430/p/include" // 人によって、指定場所がちょい違うかも
+                "~/.conan2/p/gtest76809f6b05430/p/include",
+                "~/.conan2/p/janss920afb684ab54/p/include"
             ],
             "defines": [],
             "macFrameworkPath": [
