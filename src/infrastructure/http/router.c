@@ -2,7 +2,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <zlib.h>
 
 #include "../../../lib/mustach/mustach-jansson.h"
 #include "../../utils/hash_map/hash_map.h"
@@ -46,12 +45,20 @@ static char *top(request_info *info) {
 }
 
 static char *hello(request_info *info) {
-  json_t *context = json_pack("{s:s}", "name", "Sunjin");
+  char *name = get_value_from_hash_map(info->param_map, "name");
+
+  json_t *context = json_pack("{s:s}", "name", name);
 
   char *result = NULL;
   size_t result_size = 0;
   int result_status = mustach_jansson_mem((const char *)hello_html, hello_html_len, context,
                                           0, &result, &result_size);
+
+  if (result_status < 0) {
+    printf("failed template hello\n");
+    json_decref(context);
+    return strdup("");
+  }
 
   json_decref(context);
 
