@@ -16,6 +16,7 @@
 #include "../../utils/split/split.h"
 #include "../../utils/str/str.h"
 #include "../../utils/trim/trim.h"
+#include "../../utils/uri/uri.h"
 #include "router.h"
 
 #define REQUEST_SIZE 2048
@@ -200,9 +201,15 @@ static request_info *get_request(int client_sock) {
   hash_map *param_map = NULL;
   if (path_and_params_list->size >= 2) {
     char *params_str = value_linked_str_list(path_and_params_list, 1);
-    param_map = get_param_map(params_str);
+    char *decoded_params_str = NULL;
+    int decode_result = decode_uri(params_str, &decoded_params_str);
+    // TODO error handling
+    printf("== TODO params decode error handling\n");
+    param_map = get_param_map(decoded_params_str);
     free(params_str);
+    free(decoded_params_str);
     params_str = NULL;
+    decoded_params_str = NULL;
   }
 
   // header_strを取得する
