@@ -28,13 +28,10 @@ extern void thread_pool_task_queue_init(thread_pool_task_queue_t *queue,
 
 extern void thread_pool_submit(thread_pool_t *pool, void (*function)(void *),
                                void *argument) {
-  // task_t task = {function, argument};
-  // task_t task = {
-  //     .function = function,
-  //     .argument = argument,
-  // };
-
-  task_t task = {function, argument};
+  task_t task = {
+      .function = function,
+      .argument = argument,
+  };
 
   pthread_mutex_lock(&pool->queue->lock);
 
