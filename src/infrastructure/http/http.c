@@ -18,9 +18,11 @@
 #include "../../utils/trim/trim.h"
 #include "../../utils/uri/uri.h"
 #include "router.h"
+#include "thread_pool.h"
 
 #define REQUEST_SIZE 2048
 #define REQUEST_CHUNK_SIZE 1024
+#define THREAD_POOL_SIZE 100
 
 static const int MAX_PENDING_CONNECTION = 10;
 static const int PORT = 8089;
@@ -38,6 +40,7 @@ static method_t convert_method(const char *method_str);
 static hash_map *get_param_map(const char *param_str);
 static void free_request(request_info *info);
 static char *get_body_str(const char *request_str, size_t content_length);
+static void handle_client(int client_socket);
 
 extern int http_serve() {
   printf("=== start server: http://localhost:%d\n", PORT);
@@ -90,6 +93,10 @@ extern int http_serve() {
     return -1;
   }
 
+  // make thread_pool
+  thread_pool_t pool;
+  thread_pool_init(&pool, THREAD_POOL_SIZE);
+
   for (;;) {
     // accept TCP connection
     printf("=== start accept...\n");
@@ -123,53 +130,12 @@ extern int http_serve() {
       return -1;
     }
 
-    request_info *request = get_request(client_sock);
-
-    printf("=== start routing\n");
-    char *response_body = routing(request);
-
-    size_t response_body_size = strlen(response_body);
-
-    size_t response_base_size =
-        strlen("HTTP/1.1 200 OK\nContent-Length: \n\n\n");
-    size_t response_content_length_digit = num_digit(response_body_size);
-
-    printf("response_body_size is %zd\n", response_body_size);
-    printf("response_base_size is %zd\n", response_base_size);
-    printf("response_content_length_digit is %zd\n",
-           response_content_length_digit);
-
-    char response[response_body_size + response_base_size +
-                  response_content_length_digit + 1];
-    sprintf(response, "HTTP/1.1 200 OK\nContent-Length: %zu\n\n%s\n",
-            response_body_size, response_body);
-    printf("response is %s\n", response);
-
-    printf("=========== response_body_free\n");
-    if (response_body != NULL) {
-      free(response_body);
-    }
-
-    printf("=== start write...\n");
-    int write_result = write(client_sock, response, strlen(response) + 1);
-    if (write_result < 0) {
-      printf("Error: failed write to write_sock\n");
-      printf("reason: errno:%d\n", errno);
-      return -1;
-    }
-    printf("=== finished write...\n");
-
-    // free
-    printf("=== free start ===\n");
-    free_request(request);
-
-    // close
-    int close_result = close(client_sock);
-    if (close_result < 0) {
-      printf("Warning: failed close write_sock\n");
-      printf("reason: errno:%d\n", errno);
-    }
+    thread_pool_submit(&pool, (void (*)(void *))handle_client,
+                       (void *)client_sock);
   }
+
+  thread_pool_wait(&pool);
+  thread_pool_destroy(&pool);
 
   int close_result = close(server_sock);
   if (close_result < 0) {
@@ -178,6 +144,57 @@ extern int http_serve() {
   }
 
   return 0;
+}
+
+static void handle_client(int client_sock) {
+  request_info *request = get_request(client_sock);
+
+  printf("=== start routing\n");
+  char *response_body = routing(request);
+
+  size_t response_body_size = strlen(response_body);
+
+  size_t response_base_size = strlen("HTTP/1.1 200 OK\nContent-Length: \n\n\n");
+  size_t response_content_length_digit = num_digit(response_body_size);
+
+  printf("response_body_size is %zd\n", response_body_size);
+  printf("response_base_size is %zd\n", response_base_size);
+  printf("response_content_length_digit is %zd\n",
+         response_content_length_digit);
+
+  char response[response_body_size + response_base_size +
+                response_content_length_digit + 1];
+  sprintf(response, "HTTP/1.1 200 OK\nContent-Length: %zu\n\n%s\n",
+          response_body_size, response_body);
+  printf("response is %s\n", response);
+
+  printf("=========== response_body_free\n");
+  if (response_body != NULL) {
+    free(response_body);
+  }
+
+  printf("=== start write...\n");
+  int write_result = write(client_sock, response, strlen(response) + 1);
+  if (write_result < 0) {
+    printf("Error: failed write to write_sock\n");
+    printf("reason: errno:%d\n", errno);
+    // return -1;
+    // TODO free_request
+    // free_request(request);
+    // return;
+  }
+  printf("=== finished write...\n");
+
+  // free
+  printf("=== free start ===\n");
+  free_request(request);
+
+  // close
+  int close_result = close(client_sock);
+  if (close_result < 0) {
+    printf("Warning: failed close write_sock\n");
+    printf("reason: errno:%d\n", errno);
+  }
 }
 
 static request_info *get_request(int client_sock) {
