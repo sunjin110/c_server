@@ -17,6 +17,7 @@
 #include "../../utils/str/str.h"
 #include "../../utils/trim/trim.h"
 #include "../../utils/uri/uri.h"
+#include "../mysql/mysql.h"
 #include "router.h"
 #include "thread_pool.h"
 
@@ -44,6 +45,15 @@ static void handle_client(int client_socket);
 
 extern int http_serve() {
   printf("=== start server: http://localhost:%d\n", PORT);
+
+  // test
+  mysql_config config = {
+      .database = "test",
+      .host = "localhost",
+      .pass = "dummy_pass",
+      .user = "dummy_user",
+  };
+  mysql_setup(&config);
 
   // read socket
   // ipv4 protocol,

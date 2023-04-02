@@ -9,6 +9,8 @@ run apt-get install git -y
 run apt-get install wget -y
 run apt-get install zip -y
 run apt-get install build-essential -y
+run apt-get install xxd -y
+run apt-get install sqlite3 -y
 run pip install conan
 
 workdir /tmp

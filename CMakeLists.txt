@@ -12,22 +12,24 @@ project(c_server)
 find_package(jansson REQUIRED)
 include_directories(${jansson_INCLUDE_DIRS})
 
-file(GLOB_RECURSE src ${PROJECT_SOURCE_DIR} "src/*.h" "src/*.c" 
+find_package(sqlite3 REQUIRED)
+include_directories(${sqlite3_INCLUDE_DIRS})
+
+find_package(libmysqlclient REQUIRED)
+include_directories(${libmysqlclient_INCLUDE_DIRS})
+
+# file(GLOB_RECURSE src ${PROJECT_SOURCE_DIR} "src/*.h" "src/*.c" 
+#   "lib/mustach/mustach.h" "lib/mustach/mustach.c" "lib/mustach/mustach-jansson.h" "lib/mustach/mustach-jansson.c"
+#   "lib/mustach/mustach-wrap.h" "lib/mustach/mustach-wrap.c")
+
+file(GLOB_RECURSE src ${PROJECT_SOURCE_DIR} "src/domain/*.h" "src/*.h" "src/*.c" 
   "lib/mustach/mustach.h" "lib/mustach/mustach.c" "lib/mustach/mustach-jansson.h" "lib/mustach/mustach-jansson.c"
   "lib/mustach/mustach-wrap.h" "lib/mustach/mustach-wrap.c")
 
 add_executable(${PROJECT_NAME} main.c ${src})
-target_link_libraries(${PROJECT_NAME} jansson::jansson m)
+target_link_libraries(${PROJECT_NAME} ${libmysqlclient_LIBRARIES} ${jansson_LIBRARIES} ${sqlite3_LIBRARIES} m)
 
-# use mold
-# add_link_options(-fuse-ld=mold)
-
-# macではmoldはなんかsoldにしないといけないみたい
-# add_link_options(-fuse-ld=lld)
-
-# target_compile_options(${PROJECT_NAME} PUBLIC -Wall)
 target_compile_options(${PROJECT_NAME} PUBLIC -O2 -Wall)
-# target_compile_options(${PROJECT_NAME} PUBLIC -O2 -Wall -fuse-ld=mold)
 
 
 ## for tests
@@ -50,7 +52,8 @@ add_executable(
 target_link_libraries(
   c_server_test
   gtest::gtest
-  jansson::jansson 
+  ${jansson_LIBRARIES}
+  ${libmysqlclient_LIBRARIES} 
   m
 )
 

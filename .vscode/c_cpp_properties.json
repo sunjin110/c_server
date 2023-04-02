@@ -5,7 +5,8 @@
             "includePath": [
                 "${workspaceFolder}/**",
                 "~/.conan2/p/gtest76809f6b05430/p/include",
-                "~/.conan2/p/janss920afb684ab54/p/include"
+                "~/.conan2/p/janss920afb684ab54/p/include",
+                "~/.conan2/p/libmy2598ad761faf8/p/include"
             ],
             "defines": [],
             "macFrameworkPath": [
