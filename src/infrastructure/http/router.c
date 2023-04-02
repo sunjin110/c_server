@@ -51,8 +51,9 @@ static char *hello(request_info *info) {
 
   char *result = NULL;
   size_t result_size = 0;
-  int result_status = mustach_jansson_mem((const char *)hello_html, hello_html_len, context,
-                                          0, &result, &result_size);
+  int result_status =
+      mustach_jansson_mem((const char *)hello_html, hello_html_len, context, 0,
+                          &result, &result_size);
 
   if (result_status < 0) {
     printf("failed template hello\n");
