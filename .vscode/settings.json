@@ -25,6 +25,7 @@
         "mustach.h": "c",
         "jansson.h": "c",
         "file.h": "c",
-        "hello.html.h": "c"
+        "hello.html.h": "c",
+        "pthread.h": "c"
     }
 }
