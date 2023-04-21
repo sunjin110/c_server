@@ -1,7 +1,8 @@
 [requires]
-zlib/1.2.11
 jansson/2.14
 gtest/cci.20210126
+sqlite3/3.41.1
+libmysqlclient/8.0.31
 
 [generators]
 CMakeDeps

@@ -38,18 +38,25 @@ tidy:
 	conan install . --output-folder=build --build=missing
 
 docker_build:
-	docker build . -t github.com/sunjin110/c_server:latest
+	docker build . -t github.com/sunjin110/c_server:latest --no-cache
 
 docker_run:
 	make docker_build
 	docker run -p 8088:8088 -it github.com/sunjin110/c_server:latest
 
 docker_build_test:
-	docker build . -f Dockerfile.test -t github.com/sunjin110/c_server_test:latest
+	docker build . -f Dockerfile.test -t github.com/sunjin110/c_server_test:latest --no-cache
 
 docker_test:
 	make docker_build_test
 	docker run -it github.com/sunjin110/c_server_test:latest
 
+dev_up:
+	docker compose -f docker-compose.dev.yml up
 
-# docker run -v "/var/run/docker.sock":"/var/run/docker.sock" --entrypoint=sh github.com/sunjin110/c_server_test:latest -c "`cat semicolon_delimited_script`"
+dev_down:
+	docker compose -f docker-compose.dev.yml down 
+
+dev_clear:
+	docker system prune -y
+	docker volume rm c_server_mariadb_data
