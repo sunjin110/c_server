@@ -51,9 +51,6 @@ TEST(migration_test, success) {
         FAIL();
     }
 
-    // ctx c = ctx{
-    //     .mysql_connection = conn,
-    // };
     ctx *c = new_ctx(conn);
 
     int result = mysql_migration(c);

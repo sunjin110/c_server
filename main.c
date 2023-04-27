@@ -1,7 +1,6 @@
 #include <stdio.h>
 
 #include "src/infrastructure/http/http.h"
-// #include "src/infrastructure/mysql/mysql.h"
 
 int main() {
   // // test

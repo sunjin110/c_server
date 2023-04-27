@@ -5,6 +5,10 @@ b:
 	cmake . -DCMAKE_BUILD_TYPE=Release -B build
 	cmake --build build
 
+compile_commands:
+	# fleetとかで保管するのに必要なcompile_commands.jsonを生成する
+	cmake -DCMAKE_EXPORT_COMPILE_COMMANDS=ON -B build
+
 hard_build:
 	# なんか色々上手くいかんときは、大体これをすれば上手くいく
 	touch CMakeLists.txt
@@ -60,3 +64,4 @@ dev_down:
 dev_clear:
 	docker system prune -y
 	docker volume rm c_server_mariadb_data
+
