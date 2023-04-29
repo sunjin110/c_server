@@ -33,6 +33,7 @@ extern void setup_mysql() {
     printf("result is %d\n", result);
 }
 
+// ./build/c_server_test --gtest_filter=migration_test.success
 TEST(migration_test, success) {
     std::cout << "==== migration test ====\n";
 

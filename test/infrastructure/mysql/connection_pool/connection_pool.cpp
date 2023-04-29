@@ -31,6 +31,7 @@ void *append_new_connection_to_pool(void *p) {
     return NULL;
 }
 
+// ./build/c_server_test --gtest_filter=connection_pool.success
 TEST(connection_pool, success) {
     std::cout << "==== mysql_connection_pool test ====\n";
 
@@ -67,26 +68,3 @@ TEST(connection_pool, success) {
     // connectionsを削除
     mysql_connection_pool_destroy(pool);
 }
-
-// void append_new_connection_to_pool(mysql_connection_pool *pool) {
-// void *append_new_connection_to_pool(void *p) {
-
-//     mysql_connection_pool *pool = (mysql_connection_pool *)p;
-//     mysql_config *cfg = test_mysql_config();
-//     MYSQL *new_mysql_client = mysql_setup(cfg);
-//     if (new_mysql_client == NULL) {
-//         std::cout << "========== failed create mysql client...\n";
-//         return NULL;
-//     }
-
-//     std::cout << "========== wait 1\n";
-//     sleep(1);
-//     std::cout << "========== wait 2\n";
-//     sleep(1);
-//     std::cout << "========== wait 3\n";
-//     sleep(1);
-
-//     std::cout << "========== append new mysql client\n";    
-//     append_mysql_connection(pool, new_mysql_client);
-//     return NULL;
-// }

@@ -11,6 +11,7 @@ extern "C" {
     #include "../../../../src/utils/uuid/uuid.h"
 }
 
+// ./build/c_server_test --gtest_filter=insert_user_test.success
 TEST(insert_user_test, success) {
     std::cout << "==== insert_user test ====\n";
      mysql_config cfg = {
@@ -41,6 +42,7 @@ TEST(insert_user_test, success) {
     destroy_ctx(c);
 }
 
+// ./build/c_server_test --gtest_filter=delete_user_test.success
 TEST(delete_user_test, success) {
     mysql_config cfg = {
         .database = "c_server",
@@ -62,6 +64,7 @@ TEST(delete_user_test, success) {
     destroy_ctx(c);
 }
 
+// ./build/c_server_test --gtest_filter=get_user_test.success
 TEST(get_user_test, success) {
     mysql_config cfg = {
         .database = "c_server",
@@ -84,4 +87,5 @@ TEST(get_user_test, success) {
         return;
     }
     debug_user_print(u);
+    destroy_ctx(c);
 }
