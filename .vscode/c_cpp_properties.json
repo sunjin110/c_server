@@ -15,6 +15,15 @@
             "intelliSenseMode": "macos-clang-arm64",
             "configurationProvider": "ms-vscode.makefile-tools",
             "compileCommands": "${workspaceFolder}/build/compile_commands.json"
+        },
+        {
+            "name": "Ubuntu",
+            "includePath": [
+                "${workspaceFolder}/**"
+            ],
+            "cStandard": "c17",
+            "cppStandard": "c++14",
+            "compileCommands": "${workspaceFolder}/build/compile_commands.json"
         }
     ],
     "version": 4

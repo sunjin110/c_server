@@ -1,0 +1,43 @@
+version: '3.8'
+
+services:
+  mariadb:
+    image: mariadb:latest
+    volumes:
+      - mariadb_test_data:/var/lib/mysql
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: root_passw0rd
+      MYSQL_DATABASE: c_server
+      MYSQL_USER: c_server_user
+      MYSQL_PASSWORD: passw0rd
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "mysql",
+          "-uc_server_user",
+          "-ppassw0rd",
+          "-e",
+          "use c_server"
+        ]
+      interval: 3s
+      timeout: 5s
+      retries: 5
+      start_period: 3s # sleepの文だけ遅延
+
+  tests:
+    container_name: tests
+    build:
+      context: .
+      dockerfile: Dockerfile.test
+    depends_on:
+      mariadb:
+        condition: service_healthy
+
+volumes:
+  mariadb_test_data:
+
+
+networks:
+  c_server_test_network:

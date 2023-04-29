@@ -12,28 +12,50 @@ cmake_print_variables(CMAKE_CXX_LINK_EXECUTABLE)
 
 project(c_server)
 
+# moldリンカ設定
+if (LINUX)
+  set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -fuse-ld=mold")
+  set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -fuse-ld=mold")
+elseif(APPLE)
+  # macでのCPP buildはmoldは対応していない
+  set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -fuse-ld=lld")
+  set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -fuse-ld=lld")
+else()
+  set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -fuse-ld=mold")
+  set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -fuse-ld=mold")
+endif()
+
 find_package(jansson REQUIRED)
 include_directories(${jansson_INCLUDE_DIRS})
 
-find_package(sqlite3 REQUIRED)
-include_directories(${sqlite3_INCLUDE_DIRS})
+
+# find_package(sqlite3 REQUIRED)
+# include_directories(${sqlite3_INCLUDE_DIRS})
+
+# find_package(stduuid REQUIRED)
+# include_directories(${stduuid_INCLUDE_DIRS})
+
+# cmake_print_variables(stduuid_LIBRARIES)
 
 find_package(libmysqlclient REQUIRED)
 include_directories(${libmysqlclient_INCLUDE_DIRS})
-
-# file(GLOB_RECURSE src ${PROJECT_SOURCE_DIR} "src/*.h" "src/*.c" 
-#   "lib/mustach/mustach.h" "lib/mustach/mustach.c" "lib/mustach/mustach-jansson.h" "lib/mustach/mustach-jansson.c"
-#   "lib/mustach/mustach-wrap.h" "lib/mustach/mustach-wrap.c")
 
 file(GLOB_RECURSE src ${PROJECT_SOURCE_DIR} "src/domain/*.h" "src/*.h" "src/*.c" 
   "lib/mustach/mustach.h" "lib/mustach/mustach.c" "lib/mustach/mustach-jansson.h" "lib/mustach/mustach-jansson.c"
   "lib/mustach/mustach-wrap.h" "lib/mustach/mustach-wrap.c")
 
 add_executable(${PROJECT_NAME} main.c ${src})
-target_link_libraries(${PROJECT_NAME} ${libmysqlclient_LIBRARIES} ${jansson_LIBRARIES} ${sqlite3_LIBRARIES} m)
+
+
+if(LINUX)
+  target_link_libraries(${PROJECT_NAME} ${libmysqlclient_LIBRARIES} ${jansson_LIBRARIES} ${sqlite3_LIBRARIES} uuid m)
+elseif(APPLE)
+  target_link_libraries(${PROJECT_NAME} ${libmysqlclient_LIBRARIES} ${jansson_LIBRARIES} ${sqlite3_LIBRARIES} m)
+else(LINUX)
+  target_link_libraries(${PROJECT_NAME} ${libmysqlclient_LIBRARIES} ${jansson_LIBRARIES} ${sqlite3_LIBRARIES} uuid m)
+endif(LINUX)
 
 target_compile_options(${PROJECT_NAME} PUBLIC -O2 -Wall)
-
 
 ## for tests
 enable_testing()
@@ -52,13 +74,13 @@ add_executable(
     c_server_test ${src} ${test}
 )
 
-target_link_libraries(
-  c_server_test
-  gtest::gtest
-  ${jansson_LIBRARIES}
-  ${libmysqlclient_LIBRARIES} 
-  m
-)
+if(LINUX)
+  target_link_libraries( c_server_test gtest::gtest ${jansson_LIBRARIES} ${libmysqlclient_LIBRARIES} uuid m)
+elseif(APPLE)
+  target_link_libraries( c_server_test gtest::gtest ${jansson_LIBRARIES} ${libmysqlclient_LIBRARIES} m)
+else(LINUX)
+  target_link_libraries( c_server_test gtest::gtest ${jansson_LIBRARIES} ${libmysqlclient_LIBRARIES} uuid m)
+endif(LINUX)
 
 include(GoogleTest)
 gtest_discover_tests(c_server_test)
