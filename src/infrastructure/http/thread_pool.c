@@ -94,4 +94,5 @@ extern void thread_pool_task_queue_destroy(thread_pool_task_queue_t *queue) {
   pthread_cond_destroy(&queue->not_empty);
   pthread_cond_destroy(&queue->not_full);
   free(queue->tasks);
+  // TODO free(queue) ???
 }

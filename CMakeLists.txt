@@ -1,5 +1,8 @@
 cmake_minimum_required(VERSION 3.22.1)
 
+# 補完のためのcompile_commands.jsonを生成する
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
+
 # helper
 # include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
 # CONAN_BASIC_SETUP()

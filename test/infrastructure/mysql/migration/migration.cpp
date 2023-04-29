@@ -33,6 +33,7 @@ extern void setup_mysql() {
     printf("result is %d\n", result);
 }
 
+// ./build/c_server_test --gtest_filter=migration_test.success
 TEST(migration_test, success) {
     std::cout << "==== migration test ====\n";
 
@@ -51,9 +52,6 @@ TEST(migration_test, success) {
         FAIL();
     }
 
-    // ctx c = ctx{
-    //     .mysql_connection = conn,
-    // };
     ctx *c = new_ctx(conn);
 
     int result = mysql_migration(c);

@@ -14,13 +14,11 @@ extern int mysql_migration(ctx *c) {
   }
 
   result = mysql_query(
-    conn,
-    "ALTER TABLE users ADD (email varchar(256), password varchar(256));"
-  );
+      conn,
+      "ALTER TABLE users ADD (email varchar(256), password varchar(256));");
   if (result != 0) {
     return result;
   }
 
   return 0;
 }
-
