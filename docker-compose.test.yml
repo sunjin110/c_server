@@ -28,6 +28,12 @@ services:
 
   tests:
     container_name: tests
+    environment:
+      C_SERVER_TEST_MYSQL_DATABASE: c_server
+      C_SERVER_TEST_MYSQL_USER: c_server_user
+      C_SERVER_TEST_MYSQL_PASSWORD: passw0rd
+      C_SERVER_TEST_MYSQL_HOST: mariadb
+      C_SERVER_TEST_MYSQL_PORT: 3306
     build:
       context: .
       dockerfile: Dockerfile.test
