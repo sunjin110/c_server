@@ -1,26 +1,33 @@
-from ubuntu:22.04
+FROM ubuntu:22.04
 
 # install 
-run apt-get update
-run apt-get upgrade -y
-run apt-get install cmake -y
-run apt-get install python3-pip -y
-run apt-get install git -y
-run apt-get install wget -y
-run apt-get install zip -y
-run apt-get install build-essential -y
-run pip install conan
+RUN apt-get update
+RUN apt-get upgrade -y
+RUN apt-get install cmake -y
+RUN apt-get install python3-pip -y
+RUN apt-get install git -y
+RUN apt-get install wget -y
+RUN apt-get install zip -y
+RUN apt-get install build-essential -y
+RUN apt-get install xxd -y
+RUN apt-get install sqlite3 -y
+RUN apt-get install uuid-dev -y
+RUN pip install conan
 
-workdir /tmp
-run wget https://github.com/rui314/mold/releases/download/v1.10.1/mold-1.10.1-$(arch)-linux.tar.gz
-run tar -zxvf /tmp/mold-1.10.1-$(arch)-linux.tar.gz
-run cp /tmp/mold-1.10.1-$(arch)-linux/bin/mold /usr/local/bin/mold
-run ln -s /usr/local/bin/mold /usr/local/bin/ld.mold
+WORKDIR /tmp
+RUN wget https://github.com/rui314/mold/releases/download/v1.10.1/mold-1.10.1-$(arch)-linux.tar.gz
+RUN tar -zxvf /tmp/mold-1.10.1-$(arch)-linux.tar.gz
+RUN cp /tmp/mold-1.10.1-$(arch)-linux/bin/mold /usr/local/bin/mold
+RUN ln -s /usr/local/bin/mold /usr/local/bin/ld.mold
 
-run conan profile detect
+WORKDIR /root
+COPY . .
+WORKDIR /root/lib
+RUN git clone  https://gitlab.com/jobol/mustach.git
+WORKDIR /root/lib/mustach
+RUN git checkout 1.2.5
 
-workdir /root
-copy . .
-run make hard_build
+WORKDIR /root
+RUN make hard_build
 
-cmd ./build/c_server_test
+CMD ./build/c_server_test

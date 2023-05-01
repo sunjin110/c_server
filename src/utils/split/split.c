@@ -15,9 +15,7 @@ extern linked_str_list *split(const char *str, const char *sep) {
   target_str[str_len] = '\0';
 
   char *rest = NULL;
-  char *token = NULL;
-
-  token = strtok_r(target_str, sep, &rest);
+  char *token = strtok_r(target_str, sep, &rest);
   if (token == NULL) {
     return NULL;
   }
@@ -32,11 +30,6 @@ extern linked_str_list *split(const char *str, const char *sep) {
     }
     append_linked_str_list(list, token);
   }
-
-  if (rest != NULL) {
-    free(rest);
-  }
-
   return list;
 }
 
