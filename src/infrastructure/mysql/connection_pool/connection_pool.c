@@ -49,7 +49,8 @@ extern void mysql_connection_pool_destroy(mysql_connection_pool *pool) {
   free(pool);
 }
 
-// TODO 既にlistに入っているpointerのmysql_clientが入った場合に動作がおかしくなるので
+// TODO
+// 既にlistに入っているpointerのmysql_clientが入った場合に動作がおかしくなるので
 // 将来的にそれを解決する方法を探す必要がある
 extern void append_mysql_connection(mysql_connection_pool *pool,
                                     MYSQL *mysql_client) {
@@ -90,7 +91,9 @@ extern MYSQL *pop_mysql_connection(mysql_connection_pool *pool) {
 
   pthread_mutex_lock(&pool->lock);
   while (pool->last_ptr == NULL) {
-    printf("======= mysql connectionが枯渇しているので、connectionが空くまで待機します\n");
+    printf(
+        "======= mysql "
+        "connectionが枯渇しているので、connectionが空くまで待機します\n");
     pthread_cond_wait(&pool->exists_available_connection, &pool->lock);
   }
 
