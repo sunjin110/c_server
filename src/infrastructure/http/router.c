@@ -46,7 +46,9 @@ static char *top(request_info *info) {
 
 static char *hello(request_info *info) {
   char *name = get_value_from_hash_map(info->param_map, "name");
-
+  if (name == NULL) {
+    name = strdup("");
+  }
   json_t *context = json_pack("{s:s}", "name", name);
 
   char *result = NULL;
@@ -60,8 +62,6 @@ static char *hello(request_info *info) {
     json_decref(context);
     return strdup("");
   }
-
   json_decref(context);
-
   return result;
 }

@@ -14,8 +14,7 @@ typedef struct {
   size_t current_size;
   mysql_connection_element *last_ptr;
   pthread_mutex_t lock;
-  pthread_cond_t
-      exists_available_connection;  
+  pthread_cond_t exists_available_connection;
 } mysql_connection_pool;
 
 extern mysql_connection_pool *new_mysql_connection_pool(mysql_config *config,
