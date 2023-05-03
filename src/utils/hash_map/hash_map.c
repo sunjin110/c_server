@@ -79,6 +79,10 @@ static entry *get_entry_from_hash_map(hash_map *map, const char *key) {
 
 // これで受け取ったstringは消す必要がない、変更する場合はcopyする必要あり
 extern char *get_value_from_hash_map(hash_map *map, const char *key) {
+  if (map == NULL) {
+    return NULL;
+  }
+
   entry *e = get_entry_from_hash_map(map, key);
   if (e == NULL) {
     return NULL;
