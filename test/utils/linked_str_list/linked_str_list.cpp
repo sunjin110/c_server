@@ -11,9 +11,9 @@ TEST(src_utils_linked_str_list, success) {
     linked_str_list *list = new_linked_str_list();
 
     std::cout << "===== append_linked_str_list\n";
-    append_linked_str_list(list, "hello world");
-    append_linked_str_list(list, "sunjin");
-    append_linked_str_list(list, "どうぞよろしく");
+    append_linked_str_list(list, (char *)"hello world");
+    append_linked_str_list(list, (char *)"sunjin");
+    append_linked_str_list(list, (char *)"どうぞよろしく");
     std::cout << "===== print_linked_str_list\n";
     print_linked_str_list(list);
 

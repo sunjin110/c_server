@@ -100,6 +100,7 @@
         "iomanip": "cpp",
         "numbers": "cpp",
         "span": "cpp",
-        "cinttypes": "cpp"
+        "cinttypes": "cpp",
+        "_types.h": "c"
     }
 }

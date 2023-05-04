@@ -38,8 +38,7 @@ extern int decode_uri(char* const src, char** dest) {
     if (*p == '%') {
       p++;
 
-      //   TODO warningが出ないようにする
-      sscanf(p, "%2X", *(dest) + current_position);
+      sscanf(p, "%2X", (unsigned int *)(*(dest) + current_position));
       p += 2;
       current_position++;
       continue;
