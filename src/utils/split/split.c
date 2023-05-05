@@ -11,7 +11,7 @@ extern linked_str_list *split(const char *str, const char *sep) {
 
   size_t str_len = strlen(str);
   char target_str[str_len + 1];
-  strncpy(target_str, str, str_len);
+  strncpy(target_str, str, str_len + 1);
   target_str[str_len] = '\0';
 
   char *rest = NULL;

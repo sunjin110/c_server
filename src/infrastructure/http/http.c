@@ -20,6 +20,7 @@
 #include "../mysql/mysql.h"
 #include "router.h"
 #include "thread_pool.h"
+#include "../../common/converter/converter.h"
 
 #define REQUEST_SIZE 2048
 #define REQUEST_CHUNK_SIZE 1024
@@ -141,7 +142,7 @@ extern int http_serve() {
     }
 
     thread_pool_submit(&pool, (void (*)(void *))handle_client,
-                       (void *)client_sock);
+                       INT_TO_VOIDP(client_sock));
   }
 
   thread_pool_wait(&pool);
@@ -230,8 +231,8 @@ static request_info *get_request(int client_sock) {
     char *params_str = value_linked_str_list(path_and_params_list, 1);
     char *decoded_params_str = NULL;
     int decode_result = decode_uri(params_str, &decoded_params_str);
-    // TODO error handling
-    printf("== TODO params decode error handling\n");
+
+    printf("== TODO params decode error handling. decode_result:%d\n", decode_result);
     param_map = get_param_map(decoded_params_str);
     free(params_str);
     free(decoded_params_str);

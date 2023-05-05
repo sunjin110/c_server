@@ -1,4 +1,3 @@
-
 #include "mysql.h"
 
 #include <cstdlib>
@@ -25,22 +24,22 @@ static int convert_port(char *port_str) {
 extern mysql_config *test_mysql_config() {
 
   cout << "======== test mysql config =========" << endl;
-  auto *database = getenv("C_SERVER_TEST_MYSQL_DATABASE");
+  const char *database = getenv("C_SERVER_TEST_MYSQL_DATABASE");
   if (database == NULL) {
     database = "c_server";
   }
 
-  auto user = getenv("C_SERVER_TEST_MYSQL_USER");
+  const char *user = getenv("C_SERVER_TEST_MYSQL_USER");
   if (user == NULL) {
     user = "c_server_user";
   }
 
-  auto password = getenv("C_SERVER_TEST_MYSQL_PASSWORD");
+  const char *password = getenv("C_SERVER_TEST_MYSQL_PASSWORD");
   if (password == NULL) {
     password = "passw0rd";
   }
 
-  auto host = getenv("C_SERVER_TEST_MYSQL_HOST");
+  const char *host = getenv("C_SERVER_TEST_MYSQL_HOST");
   if (host == NULL) {
     host = "127.0.0.1";
   }
