@@ -2,6 +2,8 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include "../../common/logger/logger.h"
+
 #ifndef URI_CONVERT_BUFFER_SIZE
 #define URI_CONVERT_BUFFER_SIZE 1024
 #endif
@@ -14,7 +16,7 @@ extern int decode_uri(char* const src, char** dest) {
 
   *dest = (char*)malloc(sizeof(char) * URI_CONVERT_BUFFER_SIZE);
   if (*dest == NULL) {
-    printf("uri.decode_uri failed allocate memory\n");
+    ERR_PRINT("uri.decode_uri failed allocate memory\n");
     return -1;
   }
   memset(*dest, '\0', URI_CONVERT_BUFFER_SIZE);
@@ -29,7 +31,7 @@ extern int decode_uri(char* const src, char** dest) {
       buffer_size += URI_CONVERT_BUFFER_SIZE;
       *dest = (char*)realloc(*dest, sizeof(char) * buffer_size);
       if (*dest == NULL) {
-        printf("uri.decode_uri failed reallocate memory\n");
+        ERR_PRINT("uri.decode_uri failed reallocate memory\n");
         return -1;
       }
       memset(*dest + current_position, '\0', URI_CONVERT_BUFFER_SIZE);
@@ -38,7 +40,7 @@ extern int decode_uri(char* const src, char** dest) {
     if (*p == '%') {
       p++;
 
-      sscanf(p, "%2X", (unsigned int *)(*(dest) + current_position));
+      sscanf(p, "%2X", (unsigned int*)(*(dest) + current_position));
       p += 2;
       current_position++;
       continue;
@@ -57,7 +59,7 @@ extern int encode_uri(char* const src, char** dest) {
 
   *dest = (char*)malloc(sizeof(char) * URI_CONVERT_BUFFER_SIZE);
   if (*dest == NULL) {
-    printf("uri.encode_uri failed allocate memory\n");
+    ERR_PRINT("uri.encode_uri failed allocate memory\n");
     return -1;
   }
   memset(*dest, '\0', URI_CONVERT_BUFFER_SIZE);
@@ -94,8 +96,7 @@ extern int encode_uri(char* const src, char** dest) {
      * 途中、暗黙のキャストにより 4byte へ拡張され出力されてしまうので、
      * ビットへのAND操作により、下位 8bit (1byte) ぶんを取り出す
      */
-    current_position +=
-        sprintf(*dest + current_position, "%%%02X", *p & 0x000000FF);
+    current_position += sprintf(*dest + current_position, "%%%02X", *p & 0x000000FF);
     p++;
   }
 

@@ -1,6 +1,5 @@
 #include "mysql.h"
 
-#include <stdio.h>
 #include <stdlib.h>
 
 extern MYSQL *mysql_setup(mysql_config *config) {
@@ -8,18 +7,7 @@ extern MYSQL *mysql_setup(mysql_config *config) {
     return NULL;
   }
   MYSQL *connection = mysql_init(NULL);
-  // return mysql_real_connect(connection, config->host, config->user,
-  // config->pass, config->database, config->port, NULL, 0);
-  mysql_real_connect(connection, config->host, config->user, config->pass,
-                     config->database, config->port, NULL, 0);
-
-  // const char* err_message = mysql_error(connection);
-  // if (err_message != NULL) {
-  //     printf("host: %s, user: %s, pass: %s, database: %s, port: %d\n",
-  //     config->host, config->user, config->pass, config->database,
-  //     config->port); printf("error message is %s\n", err_message);
-  // }
-
+  mysql_real_connect(connection, config->host, config->user, config->pass, config->database, config->port, NULL, 0);
   return connection;
 }
 

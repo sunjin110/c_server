@@ -2,13 +2,14 @@
 
 #include <errno.h>
 #include <netinet/in.h>
-#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <sys/socket.h>
 #include <sys/types.h>
 #include <unistd.h>
 
+#include "../../common/converter/converter.h"
+#include "../../common/logger/logger.h"
 #include "../../utils/equal_str/equal_str.h"
 #include "../../utils/hash_map/hash_map.h"
 #include "../../utils/linked_str_list/linked_str_list.h"
@@ -20,7 +21,6 @@
 #include "../mysql/mysql.h"
 #include "router.h"
 #include "thread_pool.h"
-#include "../../common/converter/converter.h"
 
 #define REQUEST_SIZE 2048
 #define REQUEST_CHUNK_SIZE 1024
@@ -45,7 +45,7 @@ static char *get_body_str(const char *request_str, size_t content_length);
 static void handle_client(int client_socket);
 
 extern int http_serve() {
-  printf("=== start server: http://localhost:%d\n", PORT);
+  INFO_PRINTLN("start server: http://localhost:%d", PORT);
 
   // test
   mysql_config config = {
@@ -60,7 +60,7 @@ extern int http_serve() {
   // ipv4 protocol,
   int server_sock = socket(AF_INET, SOCK_STREAM, 0);
   if (server_sock < 0) {
-    printf("Error: failed make server_sock\n");
+    ERR_PRINTLN("Error: failed make server_sock");
     return -1;
   }
 
@@ -75,30 +75,30 @@ extern int http_serve() {
 
   int server_result = bind(server_sock, (struct sockaddr *)&addr, sizeof(addr));
   if (server_result < 0) {
-    printf("Error: failed bind socket\n");
+    ERR_PRINTLN("Error: failed bind socket");
     return -1;
   }
 
   // listen
-  printf("=== start listen...\n");
+  DEBUG_PRINT("=== start listen...\n");
   int listen_result = listen(server_sock, MAX_PENDING_CONNECTION);
   if (listen_result < 0) {
-    printf("Error: failed listen\n");
+    ERR_PRINT("Error: failed listen\n");
     switch (errno) {
       case EADDRINUSE:
-        printf("reason: Address already in use\n");
+        ERR_PRINT("reason: Address already in use\n");
         break;
       case EBADF:
-        printf("reason: Bad file descriptor\n");
+        ERR_PRINT("reason: Bad file descriptor\n");
         break;
       case ENOTSOCK:
-        printf("reason: Socket operation on non-socket\n");
+        ERR_PRINT("reason: Socket operation on non-socket\n");
         break;
       case EOPNOTSUPP:
-        printf("reason: Operation not supported on socket");
+        ERR_PRINT("reason: Operation not supported on socket");
         break;
       default:
-        printf("reason: unknown, errno:%d\n", errno);
+        ERR_PRINT("reason: unknown, errno:%d\n", errno);
     }
 
     return -1;
@@ -110,39 +110,37 @@ extern int http_serve() {
 
   for (;;) {
     // accept TCP connection
-    printf("=== start accept...\n");
+    DEBUG_PRINT("=== start accept...\n");
     struct sockaddr_in client = {};
     socklen_t client_length = sizeof(client);
-    int client_sock =
-        accept(server_sock, (struct sockaddr *)&client, &client_length);
+    int client_sock = accept(server_sock, (struct sockaddr *)&client, &client_length);
     if (client_sock < 0) {
-      printf("Error: failed accept.\n");
+      ERR_PRINT("Error: failed accept.\n");
       switch (errno) {
         case EAGAIN:
-          printf("reason: Resource temporarily unavailable\n");
+          ERR_PRINT("reason: Resource temporarily unavailable\n");
           break;
         case EBADF:
-          printf("reason: Bad file descriptor\n");
+          ERR_PRINT("reason: Bad file descriptor\n");
           break;
         case ECONNABORTED:
-          printf("reason: Software caused connection abort\n");
+          ERR_PRINT("reason: Software caused connection abort\n");
           break;
         case EFAULT:
-          printf("reason: Bad address\n");
+          ERR_PRINT("reason: Bad address\n");
           break;
         case EINTR:
-          printf("reason: Interrupted system call\n");
+          ERR_PRINT("reason: Interrupted system call\n");
           break;
         default:
-          printf("reason: errno:%d\n", errno);
+          ERR_PRINT("reason: errno:%d\n", errno);
           break;
       }
 
       return -1;
     }
 
-    thread_pool_submit(&pool, (void (*)(void *))handle_client,
-                       INT_TO_VOIDP(client_sock));
+    thread_pool_submit(&pool, (void (*)(void *))handle_client, INT_TO_VOIDP(client_sock));
   }
 
   thread_pool_wait(&pool);
@@ -150,8 +148,8 @@ extern int http_serve() {
 
   int close_result = close(server_sock);
   if (close_result < 0) {
-    printf("Warning: failed close server_sock\n");
-    printf("reason: errno:%d\n", errno);
+    WARN_PRINT("Warning: failed close server_sock\n");
+    WARN_PRINT("reason: errno:%d\n", errno);
   }
 
   return 0;
@@ -160,7 +158,7 @@ extern int http_serve() {
 static void handle_client(int client_sock) {
   request_info *request = get_request(client_sock);
 
-  printf("=== start routing\n");
+  DEBUG_PRINT("=== start routing\n");
   char *response_body = routing(request);
 
   size_t response_body_size = strlen(response_body);
@@ -168,43 +166,40 @@ static void handle_client(int client_sock) {
   size_t response_base_size = strlen("HTTP/1.1 200 OK\nContent-Length: \n\n\n");
   size_t response_content_length_digit = num_digit(response_body_size);
 
-  printf("response_body_size is %zd\n", response_body_size);
-  printf("response_base_size is %zd\n", response_base_size);
-  printf("response_content_length_digit is %zd\n",
-         response_content_length_digit);
+  DEBUG_PRINT("response_body_size is %zd\n", response_body_size);
+  DEBUG_PRINT("response_base_size is %zd\n", response_base_size);
+  DEBUG_PRINT("response_content_length_digit is %zd\n", response_content_length_digit);
 
-  char response[response_body_size + response_base_size +
-                response_content_length_digit + 1];
-  sprintf(response, "HTTP/1.1 200 OK\nContent-Length: %zu\n\n%s\n",
-          response_body_size, response_body);
-  printf("response is %s\n", response);
+  char response[response_body_size + response_base_size + response_content_length_digit + 1];
+  sprintf(response, "HTTP/1.1 200 OK\nContent-Length: %zu\n\n%s\n", response_body_size, response_body);
+  DEBUG_PRINT("response is %s\n", response);
 
-  printf("=========== response_body_free\n");
+  DEBUG_PRINT("=========== response_body_free\n");
   if (response_body != NULL) {
     free(response_body);
   }
 
-  printf("=== start write...\n");
+  DEBUG_PRINT("=== start write...\n");
   int write_result = write(client_sock, response, strlen(response) + 1);
   if (write_result < 0) {
-    printf("Error: failed write to write_sock\n");
-    printf("reason: errno:%d\n", errno);
+    ERR_PRINT("Error: failed write to write_sock\n");
+    ERR_PRINT("reason: errno:%d\n", errno);
     // return -1;
     // TODO free_request
     // free_request(request);
     // return;
   }
-  printf("=== finished write...\n");
+  DEBUG_PRINT("=== finished write...\n");
 
   // free
-  printf("=== free start ===\n");
+  DEBUG_PRINT("=== free start ===\n");
   free_request(request);
 
   // close
   int close_result = close(client_sock);
   if (close_result < 0) {
-    printf("Warning: failed close write_sock\n");
-    printf("reason: errno:%d\n", errno);
+    WARN_PRINT("Warning: failed close write_sock\n");
+    WARN_PRINT("reason: errno:%d\n", errno);
   }
 }
 
@@ -225,14 +220,20 @@ static request_info *get_request(int client_sock) {
   linked_str_list *path_and_params_list = split(path_and_params, "?");
 
   // param
-  printf("=== get param\n");
+  DEBUG_PRINT("=== get param\n");
   hash_map *param_map = NULL;
   if (path_and_params_list->size >= 2) {
     char *params_str = value_linked_str_list(path_and_params_list, 1);
     char *decoded_params_str = NULL;
     int decode_result = decode_uri(params_str, &decoded_params_str);
+    if (decode_result != 0) {
+      ERR_PRINTLN("failed decode uri. params_str:%s", params_str);
+      free(params_str);
+      params_str = NULL;
+      decoded_params_str = NULL;
+      return NULL;
+    }
 
-    printf("== TODO params decode error handling. decode_result:%d\n", decode_result);
     param_map = get_param_map(decoded_params_str);
     free(params_str);
     free(decoded_params_str);
@@ -241,13 +242,12 @@ static request_info *get_request(int client_sock) {
   }
 
   // header_strを取得する
-  printf("=== get header\n");
+  DEBUG_PRINT("=== get header\n");
   hash_map *header_map = get_header_map(request_str);
 
   // body
-  printf("=== get body\n");
-  char *content_length_str =
-      get_value_from_hash_map(header_map, "Content-Length");
+  DEBUG_PRINT("=== get body\n");
+  char *content_length_str = get_value_from_hash_map(header_map, "Content-Length");
 
   char *body_str = NULL;
   if (content_length_str != NULL) {
@@ -285,7 +285,7 @@ static hash_map *get_param_map(const char *params_str) {
 
   linked_str_list *params_str_list = split(params_str, "&");
   if (params_str_list == NULL) {
-    printf("failed split params_str: [%s]\n", params_str);
+    ERR_PRINT("failed split params_str: [%s]\n", params_str);
     return NULL;
   }
 
@@ -298,8 +298,7 @@ static hash_map *get_param_map(const char *params_str) {
 
     linked_str_list *key_and_value = split(current_params->value, "=");
 
-    put_to_hash_map(param_map, key_and_value->first_ptr->value,
-                    key_and_value->last_ptr->value);
+    put_to_hash_map(param_map, key_and_value->first_ptr->value, key_and_value->last_ptr->value);
     free_linked_str_list(key_and_value);
     current_params = current_params->next_ptr;
   }
@@ -319,19 +318,19 @@ static void free_request(request_info *info) {
   free(info->path);
   info->path = NULL;
 
-  printf("=== start header_map free\n");
+  DEBUG_PRINT("=== start header_map free\n");
   if (info->header_map != NULL) {
     free_hash_map(info->header_map);
   }
 
-  printf("=== start param_map free\n");
+  DEBUG_PRINT("=== start param_map free\n");
   if (info->param_map != NULL) {
     free_hash_map(info->param_map);
   }
 
-  printf("=== start body free\n");
+  DEBUG_PRINT("=== start body free\n");
   if (info->body != NULL) {
-    printf("body is %s\n", info->body);
+    DEBUG_PRINT("body is %s\n", info->body);
     free(info->body);
     // info->body = NULL;
   }
@@ -349,15 +348,15 @@ static char *get_request_str(int client_sock) {
     char buf[REQUEST_CHUNK_SIZE];
     read_bytes = read(client_sock, buf, REQUEST_CHUNK_SIZE);
     if (read_bytes < 0) {
-      printf("Error: failed read...\n");
-      printf("reason: errno:%d\n", errno);
+      ERR_PRINT("Error: failed read...\n");
+      ERR_PRINT("reason: errno:%d\n", errno);
       return NULL;
     }
 
     request = (char *)realloc(request, request_length + read_bytes);
     if (request == NULL) {
-      printf("Error: failed realloc request\n");
-      printf("reason: errno:%d\n", errno);
+      ERR_PRINT("Error: failed realloc request\n");
+      ERR_PRINT("reason: errno:%d\n", errno);
       return NULL;
     }
     memcpy(request + request_length, buf, read_bytes);
@@ -371,7 +370,7 @@ static char *get_request_str(int client_sock) {
 
 static method_t convert_method(const char *method_str) {
   if (method_str == NULL) {
-    printf("failed convert method, method_str is NULL\n");
+    ERR_PRINT("failed convert method, method_str is NULL\n");
     return -1;
   }
 
@@ -395,19 +394,19 @@ static method_t convert_method(const char *method_str) {
     return METHOD_OPTIONS;
   }
 
-  printf("failed convert method, method_str is %s\n", method_str);
+  ERR_PRINT("failed convert method, method_str is %s\n", method_str);
   return -1;
 }
 
 static char *get_body_str(const char *request, size_t content_length) {
   if (content_length <= 0) {
-    printf("not found content length");
+    DEBUG_PRINT("not found content length");
     return NULL;
   }
 
   char *header_end = (char *)strstr(request, "\r\n\r\n");
   if (header_end == NULL) {
-    printf("Error: not found header\n");
+    ERR_PRINT("not found header\n");
     return NULL;
   }
 
@@ -420,7 +419,7 @@ static char *get_body_str(const char *request, size_t content_length) {
 static hash_map *get_header_map(const char *request) {
   char *header_end = (char *)strstr(request, "\r\n\r\n");
   if (header_end == NULL) {
-    printf("Error: not found header\n");
+    ERR_PRINT("Error: not found header\n");
     return NULL;
   }
   int header_length = header_end - request + 4;
@@ -432,8 +431,7 @@ static hash_map *get_header_map(const char *request) {
   hash_map *header_map = new_hash_map();
 
   // 1個目はpathなのでスルー
-  linked_str_element *current_request_str_line =
-      header_line_list->first_ptr->next_ptr;
+  linked_str_element *current_request_str_line = header_line_list->first_ptr->next_ptr;
   for (;;) {
     if (current_request_str_line == NULL) {
       break;
@@ -441,7 +439,7 @@ static hash_map *get_header_map(const char *request) {
 
     char *key_end = (char *)strstr(current_request_str_line->value, ":");
     if (key_end == NULL) {
-      printf("not found key end\n");
+      ERR_PRINT("not found key end\n");
       break;
     }
     size_t key_size = key_end - current_request_str_line->value;
@@ -449,8 +447,7 @@ static hash_map *get_header_map(const char *request) {
     strncpy(key, current_request_str_line->value, key_size);
     key[key_size] = '\0';
 
-    size_t value_size = strlen(current_request_str_line->value) - key_size -
-                        1;  // 「:」の文の長さを削除
+    size_t value_size = strlen(current_request_str_line->value) - key_size - 1;  // 「:」の文の長さを削除
     char *value = (char *)malloc(value_size + 1);
     strncpy(value, current_request_str_line->value + key_size + 1,
             value_size);  // 「:」の長さをskip

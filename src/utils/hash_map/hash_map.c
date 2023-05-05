@@ -1,10 +1,10 @@
 #include "hash_map.h"
 
 #include <stdint.h>
-#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
+#include "../../common/logger/logger.h"
 #include "../linked_str_list/linked_str_list.h"
 
 static const int INITIAL_CAPACITY = 16;
@@ -34,15 +34,15 @@ extern hash_map *new_hash_map() {
 }
 
 extern void free_hash_map(hash_map *map) {
-  printf("=== free_hash_map\n");
+  DEBUG_PRINT("=== free_hash_map\n");
 
   if (map == NULL) {
-    printf("hash_map: free_hash_map: map is NULL\n");
+    INFO_PRINT("hash_map: free_hash_map: map is NULL\n");
     return;
   }
 
   if (map->buckets == NULL) {
-    printf("hash_map: free_hash_map: buckets is NULL\n");
+    INFO_PRINT("hash_map: free_hash_map: buckets is NULL\n");
     return;
   }
 
@@ -103,7 +103,7 @@ extern void put_to_hash_map(hash_map *map, const char *key, const char *value) {
   int index = hash(key, map->capacity);
   entry *new_entry = malloc(sizeof(entry));
   if (new_entry == NULL) {
-    printf("Error: failed malloc to new_entry\n");
+    ERR_PRINT("Error: failed malloc to new_entry\n");
     return;
   }
   new_entry->key = strdup(key);
@@ -125,7 +125,7 @@ extern void put_to_hash_map(hash_map *map, const char *key, const char *value) {
   int new_capacity = map->capacity * 2;
   entry **new_buckets = calloc(new_capacity, sizeof(entry *));
   if (new_buckets == NULL) {
-    printf("Error: failed calloc new_buckets\n");
+    ERR_PRINT("Error: failed calloc new_buckets\n");
     return;
   }
 
@@ -150,17 +150,17 @@ extern void put_to_hash_map(hash_map *map, const char *key, const char *value) {
 
 extern void debug_hash_map(hash_map *map) {
   if (map == NULL) {
-    printf("hash_map is NULL\n");
+    DEBUG_PRINT("hash_map is NULL\n");
     return;
   }
-  printf("size:%zd, capacity:%d\n", map->size, map->capacity);
+  DEBUG_PRINT("size:%zd, capacity:%d\n", map->size, map->capacity);
   for (int i = 0; i < map->capacity; i++) {
     entry *current_entry = map->buckets[i];
     for (;;) {
       if (current_entry == NULL) {
         break;
       }
-      printf("%s->%s\n", current_entry->key, current_entry->value);
+      DEBUG_PRINT("%s->%s\n", current_entry->key, current_entry->value);
       current_entry = current_entry->next;
     }
   }

@@ -8,3 +8,5 @@ git clone https://gitlab.com/jobol/mustach.git
 cd mustache
 git checkout ${MUSTACHE_VERSION}
 
+# for mac
+xcode-select --install

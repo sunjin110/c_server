@@ -46,7 +46,7 @@ extern mysql_config *test_mysql_config() {
 
   auto port_str = getenv("C_SERVER_TEST_MYSQL_PORT");
   auto port = convert_port(port_str);
-
+  
   mysql_config *cfg = (mysql_config *)malloc(sizeof(mysql_config));
   cfg->database = strdup(database);
   cfg->user = strdup(user);
