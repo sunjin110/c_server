@@ -5,8 +5,7 @@
 extern void thread_pool_init(thread_pool_t *pool, int thread_count) {
   pool->threads = (pthread_t *)malloc(sizeof(pthread_t) * thread_count);
   pool->thread_count = thread_count;
-  pool->queue =
-      (thread_pool_task_queue_t *)malloc(sizeof(thread_pool_task_queue_t));
+  pool->queue = (thread_pool_task_queue_t *)malloc(sizeof(thread_pool_task_queue_t));
   thread_pool_task_queue_init(pool->queue, thread_count);
 
   for (int i = 0; i < thread_count; i++) {
@@ -14,8 +13,7 @@ extern void thread_pool_init(thread_pool_t *pool, int thread_count) {
   }
 }
 
-extern void thread_pool_task_queue_init(thread_pool_task_queue_t *queue,
-                                        int size) {
+extern void thread_pool_task_queue_init(thread_pool_task_queue_t *queue, int size) {
   queue->tasks = (task_t *)malloc(sizeof(task_t) * size);
   queue->front = 0;
   queue->rear = -1;
@@ -26,8 +24,7 @@ extern void thread_pool_task_queue_init(thread_pool_task_queue_t *queue,
   pthread_cond_init(&queue->not_full, NULL);
 }
 
-extern void thread_pool_submit(thread_pool_t *pool, void (*function)(void *),
-                               void *argument) {
+extern void thread_pool_submit(thread_pool_t *pool, void (*function)(void *), void *argument) {
   task_t task = {
       .function = function,
       .argument = argument,
@@ -46,8 +43,7 @@ extern void thread_pool_submit(thread_pool_t *pool, void (*function)(void *),
   pthread_mutex_unlock(&pool->queue->lock);
 }
 
-extern void thread_pool_task_queue_push(thread_pool_task_queue_t *queue,
-                                        task_t task) {
+extern void thread_pool_task_queue_push(thread_pool_task_queue_t *queue, task_t task) {
   queue->rear = (queue->rear + 1) % queue->size;
   queue->tasks[queue->rear] = task;
   queue->count++;

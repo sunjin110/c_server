@@ -1,7 +1,6 @@
 b:
 	make gen
 	touch CMakeLists.txt
-	# cmake . -DCMAKE_TOOLCHAIN_FILE=build/conan_toolchain.cmake -DCMAKE_BUILD_TYPE=Release -B build
 	cmake . -DCMAKE_BUILD_TYPE=Release -B build
 	cmake --build build
 

@@ -1,9 +1,10 @@
 #include "linked_str_list.h"
 
 #include <memory.h>
-#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+
+#include "../../common/logger/logger.h"
 
 extern linked_str_list *new_linked_str_list() {
   linked_str_list *list = malloc(sizeof(linked_str_list));
@@ -31,7 +32,7 @@ extern void append_linked_str_list(linked_str_list *list, char *value) {
 extern char *value_linked_str_list(linked_str_list *list, size_t index) {
   size_t max_index = list->size - 1;
   if (max_index < index) {
-    fprintf(stderr, "linked_str_list: out of bounds. index=%zu\n", index);
+    ERR_PRINTLN("linked_str_list: out of bounds. index=%zu", index);
     return NULL;
   }
 
@@ -86,16 +87,16 @@ extern bool find_in_linked_str_list(linked_str_list *list, char *target_value) {
 
 extern void print_linked_str_list(linked_str_list *list) {
   linked_str_element *current_element = list->first_ptr;
-  printf("[");
+  DEBUG_PRINT("[");
   for (;;) {
     if (current_element == NULL) {
       return;
     }
     if (current_element->next_ptr == NULL) {
-      printf("%s]\n", current_element->value);
+      DEBUG_PRINT("%s]\n", current_element->value);
       return;
     }
-    printf("%s,", current_element->value);
+    DEBUG_PRINT("%s,", current_element->value);
     current_element = current_element->next_ptr;
   }
 }

@@ -4,6 +4,7 @@
 #include <string.h>
 
 #include "../../../lib/mustach/mustach-jansson.h"
+#include "../../common/logger/logger.h"
 #include "../../utils/hash_map/hash_map.h"
 #include "../file/file.h"
 #include "http.h"
@@ -17,7 +18,7 @@ extern char *routing(request_info *info) {
   method_t method = info->method;
   char *path = info->path;
 
-  printf("path:%s method:%d\n", path, method);
+  DEBUG_PRINT("path:%s method:%d\n", path, method);
 
   if (strcmp(path, "/") == 0) {
     switch (method) {
@@ -33,7 +34,7 @@ extern char *routing(request_info *info) {
     }
   }
 
-  printf("not found path: %s\n", path);
+  INFO_PRINT("not found path: %s\n", path);
 
   // no content
   return strdup("");
@@ -53,12 +54,10 @@ static char *hello(request_info *info) {
 
   char *result = NULL;
   size_t result_size = 0;
-  int result_status =
-      mustach_jansson_mem((const char *)hello_html, hello_html_len, context, 0,
-                          &result, &result_size);
+  int result_status = mustach_jansson_mem((const char *)hello_html, hello_html_len, context, 0, &result, &result_size);
 
   if (result_status < 0) {
-    printf("failed template hello\n");
+    ERR_PRINT("failed template hello\n");
     json_decref(context);
     return strdup("");
   }

@@ -30,6 +30,4 @@ char *rtrim(char *str, const char *seps) {
   return str;
 }
 
-extern char *trim(char *str, const char *seps) {
-  return ltrim(rtrim(str, seps), seps);
-}
+extern char *trim(char *str, const char *seps) { return ltrim(rtrim(str, seps), seps); }

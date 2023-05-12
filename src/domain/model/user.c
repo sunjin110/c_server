@@ -1,14 +1,13 @@
 
 #include "user.h"
 
-#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
+#include "../../common/logger/logger.h"
 #include "../../utils/uuid/uuid.h"
 
-extern user *new_user(const char *name, int age, const char *email,
-                      const char *password) {
+extern user *new_user(const char *name, int age, const char *email, const char *password) {
   user *u = malloc(sizeof(user));
   u->id = (char *)new_uuid();
   u->name = strdup(name);
@@ -18,8 +17,7 @@ extern user *new_user(const char *name, int age, const char *email,
   return u;
 }
 
-extern user *user_of(const char *id, const char *name, int age,
-                     const char *email, const char *password) {
+extern user *user_of(const char *id, const char *name, int age, const char *email, const char *password) {
   user *u = malloc(sizeof(user));
   u->id = strdup(id);
   u->name = strdup(name);
@@ -31,14 +29,14 @@ extern user *user_of(const char *id, const char *name, int age,
 
 extern void debug_user_print(user *u) {
   if (u == NULL) {
-    printf("========== u is NULL\n");
+    DEBUG_PRINTLN("user is NULL");
     return;
   }
-  printf("========== user.id: %s\n", u->id);
-  printf("========== user.name: %s\n", u->name);
-  printf("========== user.age: %d\n", u->age);
-  printf("========== user.email: %s\n", u->email);
-  // printf("========== user.id: %s\n", u->id);
+  DEBUG_PRINT("user.id: %s\n", u->id);
+  DEBUG_PRINT("user.name: %s\n", u->name);
+  DEBUG_PRINT("user.age: %d\n", u->age);
+  DEBUG_PRINT("user.email: %s\n", u->email);
+  DEBUG_PRINT("user.id: %s\n", u->id);
 }
 
 extern void free_user(user *u) {

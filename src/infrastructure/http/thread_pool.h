@@ -23,8 +23,7 @@ typedef struct {
 } thread_pool_t;
 
 void thread_pool_init(thread_pool_t *pool, int thread_count);
-void thread_pool_submit(thread_pool_t *pool, void (*function)(void *),
-                        void *argument);
+void thread_pool_submit(thread_pool_t *pool, void (*function)(void *), void *argument);
 void thread_pool_wait(thread_pool_t *pool);
 void thread_pool_destroy(thread_pool_t *pool);
 void thread_pool_task_queue_init(thread_pool_task_queue_t *queue, int size);
