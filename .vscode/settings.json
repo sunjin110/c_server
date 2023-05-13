@@ -107,6 +107,7 @@
         "__string": "cpp",
         "__tree": "cpp",
         "__tuple": "cpp",
-        "complex": "cpp"
+        "complex": "cpp",
+        "dirent.h": "c"
     }
 }
