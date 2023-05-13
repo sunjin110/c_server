@@ -101,6 +101,12 @@
         "numbers": "cpp",
         "span": "cpp",
         "cinttypes": "cpp",
-        "_types.h": "c"
+        "_types.h": "c",
+        "__bits": "cpp",
+        "__nullptr": "cpp",
+        "__string": "cpp",
+        "__tree": "cpp",
+        "__tuple": "cpp",
+        "complex": "cpp"
     }
 }

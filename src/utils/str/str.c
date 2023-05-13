@@ -1,4 +1,6 @@
 #include <stdio.h>
+#include <string.h>
+#include "str.h"
 
 extern void print_char_list(const char *str) {
   printf("[");
@@ -13,4 +15,12 @@ extern void print_char_list(const char *str) {
     str++;
   }
   printf("]\n");
+}
+
+extern bool has_prefix(const char *pre, const char *str) {
+  if (pre == NULL || str == NULL) {
+    return false;
+  }
+
+  return strncmp(pre, str, strlen(pre)) == 0;
 }
