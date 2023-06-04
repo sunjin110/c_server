@@ -7,6 +7,7 @@
 static const int INITIAL_CAPACITY = 16;
 
 static map_entry_t *get_entry_map(map_t *m, const comparable_union_t *key);
+static comparable_union_t *convert_union_key(comparable_union_enum key_type, const void *key);
 static uint64_t hash_for_map(const comparable_union_t *key, int capacity);
 
 extern map_t *new_map(comparable_union_enum key_type) {
@@ -63,9 +64,95 @@ extern void free_map(map_t *m) {
 }
 
 
-static void put_value_to_map(map_t *self, const void *key, const void *value) {
+static void put_value_to_map(map_t *self, void *key, void *value) {
+    comparable_union_t *union_key = convert_union_key(self->key_type, key);
+    if (union_key == NULL) {
+        ERR_PRINT("failed convert put key");
+        return;
+    }
 
-    // m_entry *entry =
+    // 既に対象のkeyがある場合は、valueを上書きする
+    map_entry_t *entry_map = get_entry_map(self, union_key);
+    free_comparable_union(union_key);
+    if (entry_map != NULL) {
+        free(entry_map->value);
+        entry_map->value = value;
+        return;
+    }
+
+    // ない場合は作成する
+    uint64_t index = hash_for_map(key, self->capacity);
+    if (index < 0) {
+        ERR_PRINTLN("failed generate index");
+        return;
+    }
+
+    map_entry_t *new_entry_map = malloc(sizeof(map_entry_t));
+    if (new_entry_map == NULL) {
+        ERR_PRINTLN("failed malloc");
+        return;
+    }
+
+    new_entry_map->key = key; // TODO deepcopyしてもいいかも
+    new_entry_map->value = value;
+    new_entry_map->next = NULL;
+
+    if (self->buckets[index] != NULL) {
+        // 同じhash内に値がある場合は、nextをずらす
+        new_entry_map->next = self->buckets[index];
+    }
+
+
+    self->buckets[index] = new_entry_map;
+    self->size++;
+
+    // この後はcapacityの調整
+    if (self->size <= self->capacity * 0.75) {
+        // capacityの75%の容量の場合は何もしない
+        return;
+    }
+
+    int new_capacity = self->capacity * 2;
+    map_entry_t **new_buckets = calloc(new_capacity, sizeof(map_entry_t *));
+    if (new_buckets == NULL) {
+        ERR_PRINTLN("failed calloc");
+        return;
+    }
+
+    for (int i = 0; i < self->capacity; i++) {
+        map_entry_t *current_entry = self->buckets[i];
+        for (;;) {
+            if (current_entry == NULL) {
+                break;
+            }
+            map_entry_t *tmp_next_entry = current_entry->next;
+            comparable_union_t *union_key = convert_union_key(self->key_type, tmp_next_entry->key);
+            uint64_t new_index = hash_for_map(union_key, new_capacity);
+            current_entry->next = new_buckets[new_index];
+            new_buckets[new_index] = current_entry;
+            current_entry = tmp_next_entry;
+            free_comparable_union(union_key);
+        }
+    }
+
+    free(self->buckets);
+    self->buckets = new_buckets;
+    self->capacity = new_capacity;
+}
+
+static comparable_union_t *convert_union_key(comparable_union_enum key_type, const void *key) {
+    switch (key_type) {
+        case COMPARABLE_UNION_ENUM_STRING:
+        return new_comparable_union(key_type, 0, strdup(key), '\0');
+
+        case COMPARABLE_UNION_ENUM_NUMBER:
+        return new_comparable_union(key_type, (int)key, NULL, '\0');
+
+        case COMPARABLE_UNION_ENUM_CHARACTER:
+        return new_comparable_union(key_type, 0, NULL, (char)key);
+    }
+    ERR_PRINTLN("not defined key type");
+    return NULL;
 }
 
 static void *get_value_from_map(map_t *self, const void *key) {
@@ -73,21 +160,7 @@ static void *get_value_from_map(map_t *self, const void *key) {
         return NULL;
     }
 
-    comparable_union_t *union_key = NULL;
-    switch (self->key_type) {
-        case COMPARABLE_UNION_ENUM_STRING:
-        union_key = new_comparable_union(self->key_type, 0, strdup(key), '\0');
-        break;
-
-        case COMPARABLE_UNION_ENUM_NUMBER:
-        union_key = new_comparable_union(self->key_type, (int)key, NULL, '\0');
-        break;
-
-        case COMPARABLE_UNION_ENUM_CHARACTER:
-        union_key = new_comparable_union(self->key_type, 0, NULL, (char)key);
-        break;
-    }
-
+    comparable_union_t *union_key = convert_union_key(self->key_type, key);
     if (union_key == NULL) {
         ERR_PRINTLN("undefined key type");
         return NULL;
@@ -104,7 +177,7 @@ static void *get_value_from_map(map_t *self, const void *key) {
 
 static map_entry_t *get_entry_map(map_t *map, const comparable_union_t *key) {
     uint64_t index = hash_for_map(key, map->capacity);
-    if (index <= 0) {
+    if (index < 0) {
         ERR_PRINTLN("failed get index...");
         return NULL;
     }
