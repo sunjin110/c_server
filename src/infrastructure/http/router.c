@@ -10,6 +10,7 @@
 #include "http.h"
 #include "template/hello.html.h"
 #include "template/index.html.h"
+#include "../../utils/str/str.h"
 
 static char *top(request_info *info);
 static char *hello(request_info *info);
@@ -19,6 +20,11 @@ extern char *routing(request_info *info) {
   char *path = info->path;
 
   DEBUG_PRINT("path:%s method:%d\n", path, method);
+
+  if (has_prefix("/static/", path)) {
+    DEBUG_PRINTLN("=========== TODO staticの場合に、確定でそのファイルの内容を返す");
+    return strdup("");
+  }
 
   if (strcmp(path, "/") == 0) {
     switch (method) {
@@ -64,3 +70,4 @@ static char *hello(request_info *info) {
   json_decref(context);
   return result;
 }
+

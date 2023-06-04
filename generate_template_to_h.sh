@@ -4,21 +4,29 @@ cd ${SCRIPT_DIR}
 
 cd ./src/infrastructure/http/template
 
-rm *.html.h
+find . -type f -name \*.h -exec rm {} \;
 
-for template_file in $( ls . | grep .html ); do
+for template_file in $(find . -type f -not -name \*.h); do
     echo $template_file
+    xxd -i ${template_file: 2} > ${template_file}.h
+done
 
-    xxd -i ${template_file} > ${template_file}.h
+cd ${SCRIPT_DIR}
+cd ./src/infrastructure/http/static
+
+find . -type f -name \*.h -exec rm {} \;
+
+for template_file in $(find . -type f -not -name \*.h); do
+    echo $template_file
+    xxd -i ${template_file: 2} > ${template_file}.h
 done
 
 cd ${SCRIPT_DIR}
 cd ./src/infrastructure/mysql/template
 
-rm *.sql.h
+find . -type f -name \*.h -exec rm {} \;
 
-for template_file in $( ls . | grep .sql ); do
+for template_file in $(find . -type f -not -name \*.h); do
     echo $template_file
-
-    xxd -i ${template_file} > ${template_file}.h
+    xxd -i ${template_file: 2} > ${template_file}.h
 done
