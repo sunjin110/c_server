@@ -23,6 +23,9 @@ extern map_t *new_map(comparable_union_enum key_type) {
 
     // TODO include methods
 
+    m->get = get_value_from_map;
+    m->put = put_value_to_map;
+
 
     return m;
 }
@@ -48,15 +51,19 @@ extern void free_map(map_t *m) {
     }
     free(m->buckets);
 
-    if (m->get != NULL) {
-        free(m->get);
-    } 
-    if (m->put != NULL) {
-        free(m->put);
-    }
-    if (m->remove != NULL) {
-        free(m->remove);
-    }
+    // if (m->get != NULL) {
+    //     free(m->get);
+    // } 
+    // if (m->put != NULL) {
+    //     free(m->put);
+    // }
+    // if (m->remove != NULL) {
+    //     free(m->remove);
+    // }
+
+    m->get = NULL;
+    m->put = NULL;
+    m->remove = NULL;
     m->capacity = 0;
     m->size = 0;
     free(m);

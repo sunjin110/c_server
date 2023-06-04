@@ -20,7 +20,7 @@ typedef struct _map_t {
     comparable_union_enum key_type;
 
     void *(*get)(struct _map_t *self, const void *key);
-    void (*put)(struct _map_t *self, const void *key, void *value);
+    void (*put)(struct _map_t *self, void *key, void *value);
     void (*remove)(struct _map_t *self, const void *key);
 } map_t;
 
